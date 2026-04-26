@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เมนูหลัก - Slip H2o</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <link rel="icon" href="assets/image/logo1/logoSlipH2o.png" type="image/png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap');
+
+        :root {
+            --bg-main: linear-gradient(135deg, #fda1d4 0%, #c2fbc2 50%, #e0c3fc 100%);
+            --card-bg: rgba(255, 255, 255, 0.45); 
+            --card-border: rgba(255, 255, 255, 0.6);
+            --sidebar-bg: rgba(255, 255, 255, 0.35); 
+            --text-main: #1e293b;
+            --text-muted: #475569;
+            --primary-color: #3b82f6; 
+            --primary-glow: rgba(59, 130, 246, 0.4);
+            --item-bg: rgba(255, 255, 255, 0.55);
+            --item-hover-bg: rgba(255, 255, 255, 0.95);
+            --logo-box-bg: rgba(255, 255, 255, 0.8);
+            --shadow: 0 10px 40px rgba(0, 0, 50, 0.08);
+            --warning-color: #d97706; 
+        }
+
+        body.theme-dark {
+            --bg-main: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --sidebar-bg: rgba(15, 23, 42, 0.6);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --item-bg: rgba(255, 255, 255, 0.02);
+            --item-hover-bg: rgba(255, 255, 255, 0.06);
+            --logo-box-bg: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            --warning-color: #f59e0b; 
+        }
+
+        body {
+            background: var(--bg-main);
+            color: var(--text-main);
+            font-family: 'Kanit', sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            transition: background 0.5s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s ease;
+        }
+        
+        .slip-shell { display: flex; height: 100vh; overflow: hidden; }
+        
+        .slip-sidebar { 
+            width: 280px; 
+            display: flex; flex-direction: column; 
+            background: var(--sidebar-bg); 
+            border-right: 1px solid var(--card-border); 
+            backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+            padding: 25px 20px; overflow-y: auto; flex-shrink: 0; 
+            transition: all 0.5s ease;
+            box-shadow: 5px 0 30px rgba(0,0,0,0.02);
+        }
+
+        .slip-sidebar::-webkit-scrollbar { width: 5px; }
+        .slip-sidebar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+        body.theme-dark .slip-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
+        
+        .slip-main { flex-grow: 1; overflow-y: auto; padding: 20px 30px; }
+
+        .sidebar-brand img { 
+            max-width: 140px; margin-bottom: 30px; 
+            animation: floatLogo 4s ease-in-out infinite; 
+            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.05));
+        }
+        @keyframes floatLogo { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        
+        .sidebar-menu { display: flex; flex-direction: column; gap: 6px; }
+        
+        .sidebar-link { 
+            position: relative; display: flex; align-items: center; gap: 12px; 
+            color: var(--text-muted); text-decoration: none; 
+            padding: 12px 18px; border-radius: 12px; font-weight: 500; 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden;
+        }
+        .sidebar-link::before {
+            content: ''; position: absolute; left: 0; top: 15%; height: 70%; width: 4px; 
+            background: var(--text-main); border-radius: 0 4px 4px 0; 
+            transform: scaleY(0); transition: 0.3s ease; opacity: 0;
+        }
+        .sidebar-link:hover::before, .sidebar-link.active::before { transform: scaleY(1); opacity: 1; }
+        .sidebar-link:hover, .sidebar-link.active { 
+            background: var(--primary-color); color: #fff; transform: translateX(6px); box-shadow: 0 4px 15px var(--primary-glow);
+        }
+
+        .sidebar-icon-img { width: 22px; height: 22px; object-fit: contain; transition: 0.3s; }
+        .sidebar-link:hover .sidebar-icon-img { transform: scale(1.15) rotate(-5deg); }
+        
+        .sidebar-link[aria-expanded="true"] .toggle-icon { transform: rotate(180deg); }
+        .toggle-icon { transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); font-size: 0.85rem; opacity: 0.7; }
+        .sub-link { padding: 10px 15px; font-size: 0.95rem; border-radius: 8px; }
+
+        .slip-navbar {
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 16px; backdrop-filter: blur(25px);
+            padding: 12px 20px; transition: all 0.5s ease; box-shadow: var(--shadow);
+        }
+
+        .tab-switcher {
+            display: inline-flex; background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 50rem; padding: 6px; margin-bottom: 25px; backdrop-filter: blur(20px);
+            box-shadow: var(--shadow);
+        }
+        .tab-btn {
+            background: transparent; color: var(--text-muted); border: none; padding: 10px 24px;
+            border-radius: 50rem; font-weight: 500; font-size: 0.95rem; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .tab-btn:hover { color: var(--text-main); transform: translateY(-2px); }
+        .tab-btn.active { background: var(--primary-color); color: #fff; box-shadow: 0 6px 20px var(--primary-glow); }
+
+        .expire-badge {
+            background: var(--item-bg); border: 1px solid var(--card-border); border-radius: 50rem;
+            padding: 6px 16px; display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow); transition: 0.3s;
+        }
+        .expire-badge:hover { transform: scale(1.05); border-color: var(--warning-color); }
+        .expire-icon { font-size: 1.2rem; color: var(--warning-color); animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.15); opacity: 0.7; } }
+
+        .btn-outline-danger { border-color: #ef4444; color: #ef4444; transition: 0.3s; background: transparent; }
+        .btn-outline-danger:hover { background: #ef4444; color: #fff; box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3); transform: translateY(-2px); }
+
+        .slip-card {
+            background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 24px;
+            padding: 30px; box-shadow: var(--shadow); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            transition: all 0.5s ease; animation: popIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes popIn { 0% { opacity: 0; transform: translateY(20px) scale(0.98); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+
+        .app-section-header h5 { font-weight: 600; color: var(--text-main); letter-spacing: 0.5px; }
+
+        .provider-grid { display: flex !important; flex-wrap: wrap !important; justify-content: center !important; gap: 20px !important; margin-top: 25px; }
+        
+        .provider-item[href*="kbank"], .provider-item[onclick*="kbank"] { --hover-color: #00a950; --hover-glow: #00a95066; }
+        .provider-item[href*="scb"],   .provider-item[onclick*="scb"]   { --hover-color: #4e2a84; --hover-glow: #4e2a8466; }
+        .provider-item[href*="ktb"],   .provider-item[onclick*="ktb"]   { --hover-color: #1ba5e1; --hover-glow: #1ba5e166; }
+        .provider-item[href*="bay"],   .provider-item[onclick*="bay"]   { --hover-color: #fec43b; --hover-glow: #fec43b66; }
+        .provider-item[href*="bbl"],   .provider-item[onclick*="bbl"]   { --hover-color: #1e4598; --hover-glow: #1e459866; }
+        .provider-item[href*="ttb"],   .provider-item[onclick*="ttb"]   { --hover-color: #0050f0; --hover-glow: #0050f066; }
+        .provider-item[href*="gsb"],   .provider-item[onclick*="gsb"]   { --hover-color: #eb008b; --hover-glow: #eb008b66; }
+        .provider-item[href*="kkp"],   .provider-item[onclick*="kkp"]   { --hover-color: #55536b; --hover-glow: #55536b66; }
+        .provider-item[href*="cimb"],  .provider-item[onclick*="cimb"]  { --hover-color: #7e1f2b; --hover-glow: #7e1f2b66; }
+        .provider-item[href*="baac"],  .provider-item[onclick*="baac"]  { --hover-color: #4ba635; --hover-glow: #4ba63566; }
+        .provider-item[href*="linebk"],.provider-item[onclick*="linebk"]{ --hover-color: #00c300; --hover-glow: #00c30066; }
+        .provider-item[href*="make"],  .provider-item[onclick*="make"]  { --hover-color: #1e293b; --hover-glow: #1e293b66; }
+
+        .provider-item {
+            position: relative; width: 145px !important; background: var(--item-bg);
+            border: 1px solid var(--card-border); border-radius: 20px; padding: 20px 10px;
+            display: flex !important; flex-direction: column !important; align-items: center !important;
+            text-decoration: none !important; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            z-index: 1; overflow: hidden;
+            --hover-color: var(--primary-color);
+            --hover-glow: var(--primary-glow);
+        }
+
+        .provider-item::before {
+            content: ''; position: absolute; inset: 0; border-radius: 20px;
+            background: linear-gradient(180deg, transparent, var(--hover-glow));
+            opacity: 0; transition: opacity 0.5s ease; z-index: -1;
+        }
+
+        .provider-logo-wrap {
+            width: 75px !important; height: 75px !important; background: var(--logo-box-bg) !important;
+            border-radius: 22px !important; display: flex !important; justify-content: center !important;
+            align-items: center !important; margin-bottom: 15px !important;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.06) !important; border: 1px solid var(--card-border) !important;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
+        .provider-logo-img { width: 55% !important; height: auto !important; object-fit: contain !important; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important; }
+        
+        .text-muted-soft {
+            color: var(--text-muted) !important; font-size: 0.85rem !important;
+            font-weight: 500 !important; transition: all 0.3s !important; z-index: 2;
+        }
+
+        .provider-item:hover {
+            transform: translateY(-8px) scale(1.03) !important;
+            background: var(--item-hover-bg) !important;
+            border-color: var(--hover-color) !important;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08), 0 0 20px var(--hover-glow) !important;
+        }
+        .provider-item:hover::before { opacity: 0.5; }
+        .provider-item:hover .provider-logo-wrap {
+            transform: rotate(-5deg) scale(1.15) translateY(-5px) !important; 
+            box-shadow: 0 15px 25px var(--hover-glow) !important;
+            border-color: var(--hover-color) !important;
+        }
+        .provider-item:hover .provider-logo-img {
+            transform: scale(1.1) !important; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.1));
+        }
+        .provider-item:hover .text-muted-soft {
+            color: var(--hover-color) !important; font-weight: 600 !important;
+        }
+        
+        .btn-theme-toggle { background: var(--item-bg); color: var(--text-main); border: 1px solid var(--card-border); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-theme-toggle:hover { background: var(--primary-color); color: #fff; box-shadow: 0 5px 15px var(--primary-glow); transform: translateY(-2px); }
+
+        .preview-tooltip {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px) scale(0.95);
+            transition: opacity 0.2s, transform 0.2s, visibility 0.2s;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 8px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .preview-tooltip.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
+        }
+        .preview-tooltip img {
+            width: 200px;
+            height: auto;
+            border-radius: 10px;
+            display: block;
+        }
+    </style>
+</head>
+
+<body style="display: none;">
+
+<div id="previewTooltip" class="preview-tooltip">
+    <img id="previewImage" src="" alt="Preview">
+</div>
+
+<div class="slip-shell">
+
+  <aside class="slip-sidebar">
+    <div class="sidebar-brand text-center">
+      <img src="assets/image/logo1/logo-h2o.png" alt="Slip H2O" style="max-width: 180px; width: 100%; object-fit: contain;">
+    </div>
+
+    <nav class="sidebar-menu">
+      <a href="index.html" class="sidebar-link active mb-2">
+          <i class="bi bi-grid-1x2-fill"></i> หน้าแรก (เมนู)
+      </a>
+
+      <a data-bs-toggle="collapse" href="#menuSlips" role="button" aria-expanded="true" class="sidebar-link d-flex justify-content-between align-items-center mb-1">
+          <span><i class="bi bi-receipt me-2"></i> สลิปโอนเงิน</span>
+          <i class="bi bi-chevron-down toggle-icon"></i>
+      </a>
+      <div class="collapse show" id="menuSlips">
+          <div class="d-flex flex-column gap-1 mt-1 mb-3 ms-3 ps-3 border-start border-secondary border-opacity-25">
+              <a href="slip_kbank.html" class="sidebar-link sub-link"><img src="assets/image/logo1/p-kbank.png" class="sidebar-icon-img"> กสิกรไทย</a>
+              <a href="slip_scb.html" class="sidebar-link sub-link"><img src="assets/image/logo1/p-scb.png" class="sidebar-icon-img"> ไทยพาณิชย์</a>
+              <a href="slip_ktb.html" class="sidebar-link sub-link"><img src="assets/image/logo1/p-kt.png" class="sidebar-icon-img"> กรุงไทย</a>
+              <a href="slip_bay.html" class="sidebar-link sub-link"><img src="assets/image/logo1/p-kung.png" class="sidebar-icon-img"> กรุงศรี</a>
+              <a href="slip_bbl.html" class="sidebar-link sub-link"><img src="assets/image/logo1/p-bl.png" class="sidebar-icon-img"> กรุงเทพ</a>
+              <a href="slip_ttb.html" class="sidebar-link sub-link"><img src="assets/image/logo1/p-ttb.png" class="sidebar-icon-img"> TTB</a>
+              <a href="slip_gsb.html" class="sidebar-link sub-link"><img src="assets/image/logo1/p-o.png" class="sidebar-icon-img"> ออมสิน</a>
+              <a href="slip_kkp.html" class="sidebar-link sub-link"><img src="assets/image/logo1/p-kpp.png" class="sidebar-icon-img"> KKP</a>
+              <a href="slip_cimb.html" class="sidebar-link sub-link"><img src="assets/image/logo1/p-cimb.png" class="sidebar-icon-img"> CIMB</a>
+              <a href="slip_baac.html" class="sidebar-link sub-link"><img src="assets/image/logo1/p-tks.png" class="sidebar-icon-img"> ธ.ก.ส.</a>
+              <a href="slip_linebk.html" class="sidebar-link sub-link"><img src="assets/image/logo1/p-linebk.png" class="sidebar-icon-img"> LINE BK</a>
+              <a href="slip_make.html" class="sidebar-link sub-link"><img src="assets/image/logo1/p-make.png" class="sidebar-icon-img"> MAKE</a>
+          </div>
+      </div>
+
+      <a data-bs-toggle="collapse" href="#menuNotify" role="button" aria-expanded="false" class="sidebar-link d-flex justify-content-between align-items-center mb-1">
+          <span><i class="bi bi-bell-fill me-2"></i> แจ้งเตือนเงินเข้า</span>
+          <i class="bi bi-chevron-down toggle-icon"></i>
+      </a>
+      <div class="collapse" id="menuNotify">
+          <div class="d-flex flex-column gap-1 mt-1 mb-3 ms-3 ps-3 border-start border-secondary border-opacity-25">
+              <a href="notify_kbank1.html" class="sidebar-link sub-link"><img src="assets/image/logo1/mb1.png" class="sidebar-icon-img"> KBank แจ้งเตือน 1</a>
+              <a href="notify_kbank2.html" class="sidebar-link sub-link"><img src="assets/image/logo1/mb1.png" class="sidebar-icon-img"> KBank แจ้งเตือน 2</a>
+              <a href="notify_kbank3.html" class="sidebar-link sub-link"><img src="assets/image/logo1/mb1.png" class="sidebar-icon-img"> KBank ถอน 2 ยอด</a>
+              <a href="notify_kbank4.html" class="sidebar-link sub-link"><img src="assets/image/logo1/mb1.png" class="sidebar-icon-img"> KBank แจ้งเตือน 4</a>
+              <a href="notify_kbank5.html" class="sidebar-link sub-link"><img src="assets/image/logo1/mb1.png" class="sidebar-icon-img"> KBank แจ้งเตือน 5</a>
+              
+              <a href="notify_scb1.html" class="sidebar-link sub-link"><img src="assets/image/logo1/mb9.png" class="sidebar-icon-img"> SCB แจ้งเตือน 1</a>
+              <a href="notify_scb2.html" class="sidebar-link sub-link"><img src="assets/image/logo1/mb9.png" class="sidebar-icon-img"> SCB แจ้งเตือน 2</a>
+              <a href="notify_scb3.html" class="sidebar-link sub-link"><img src="assets/image/logo1/mb9.png" class="sidebar-icon-img"> SCB  ถอน 2 ยอด</a>
+              <a href="notify_scb4.html" class="sidebar-link sub-link"><img src="assets/image/logo1/mb9.png" class="sidebar-icon-img"> SCB แจ้งเตือน 4</a>
+              
+              <a href="notify_ktb1.html" class="sidebar-link sub-link"><img src="assets/image/logo1/mb5.png" class="sidebar-icon-img"> กรุงไทย แจ้งเตือน 1</a>
+              <a href="notify_ktb2.html" class="sidebar-link sub-link"><img src="assets/image/logo1/mb5.png" class="sidebar-icon-img"> กรุงไทย แจ้งเตือน 2</a>
+              <a href="notify_ktb3.html" class="sidebar-link sub-link"><img src="assets/image/logo1/mb5.png" class="sidebar-icon-img"> กรุงไทย แจ้งเตือน 3</a>
+              <a href="notify_ktb4.html" class="sidebar-link sub-link"><img src="assets/image/logo1/mb5.png" class="sidebar-icon-img"> กรุงไทย ถอน 2 ยอด</a>
+              <a href="notify_ktb5.html" class="sidebar-link sub-link"><img src="assets/image/logo1/mb5.png" class="sidebar-icon-img"> กรุงไทย แจ้งเตือน 5</a>
+
+              <a href="notify_bay1.html" class="sidebar-link sub-link"><img src="assets/image/logo1/mb2.png" class="sidebar-icon-img"> กรุงศรี แจ้งเตือน 1</a>
+              <a href="notify_bay2.html" class="sidebar-link sub-link"><img src="assets/image/logo1/mb2.png" class="sidebar-icon-img"> กรุงศรี แจ้งเตือน 2</a>
+              <a href="notify_bay3.html" class="sidebar-link sub-link"><img src="assets/image/logo1/mb2.png" class="sidebar-icon-img"> กรุงศรี แจ้งเตือน 3</a>
+
+              <a href="notify_bbl1.html" class="sidebar-link sub-link"><img src="assets/image/logo1/mb10.png" class="sidebar-icon-img"> กรุงเทพ แจ้งเตือน 1</a>
+              <a href="notify_bbl2.html" class="sidebar-link sub-link"><img src="assets/image/logo1/mb10.png" class="sidebar-icon-img"> กรุงเทพ แจ้งเตือน 2</a>
+
+              <a href="notify_ttb1.html" class="sidebar-link sub-link"><img src="assets/image/logo1/mb11.png" class="sidebar-icon-img"> ธนชาต แจ้งเตือน 1</a>
+              <a href="notify_ttb2.html" class="sidebar-link sub-link"><img src="assets/image/logo1/mb11.png" class="sidebar-icon-img"> ธนชาต แจ้งเตือน 2</a>
+              <a href="notify_ttb3.html" class="sidebar-link sub-link"><img src="assets/image/logo1/mb11.png" class="sidebar-icon-img"> ธนชาต แจ้งเตือน 3</a>
+
+              <a href="notify_gsb1.html" class="sidebar-link sub-link"><img src="assets/image/logo1/mb6.png" class="sidebar-icon-img"> ออมสิน แจ้งเตือน 1</a>
+              <a href="notify_gsb2.html" class="sidebar-link sub-link"><img src="assets/image/logo1/mb6.png" class="sidebar-icon-img"> ออมสิน แจ้งเตือน 2</a>
+
+              <a href="notify_baac1.html" class="sidebar-link sub-link"><img src="assets/image/logo1/mb8.png" class="sidebar-icon-img"> BAAC แจ้งเตือน 1</a>
+
+              <a href="notify_linebk.html" class="sidebar-link sub-link"><img src="assets/image/logo1/mb3.png" class="sidebar-icon-img"> LINE BK แจ้งเตือน</a>
+              <a href="notify_make.html" class="sidebar-link sub-link"><img src="assets/image/logo1/mb7.png" class="sidebar-icon-img"> MAKE แจ้งเตือน</a>
+              <a href="notify_kkp.html" class="sidebar-link sub-link"><img src="assets/image/logo1/mb4.png" class="sidebar-icon-img"> KKP แจ้งเตือน</a>
+          </div>
+      </div>
+    </nav>
+
+    <div class="mt-auto pb-3 pt-4">
+      <a href="https://t.me/Hy666B" class="btn btn-outline-danger btn-sm w-100 rounded-pill mb-2 py-2 fw-medium">
+        <i class="bi bi-headset me-1"></i> ติดต่อผู้ดูแลระบบ
+      </a>
+      <a href="login.html" onclick="logoutApp()" class="btn btn-theme-toggle btn-sm w-100 rounded-pill py-2 fw-medium">
+        <i class="bi bi-box-arrow-right me-1"></i> ออกจากระบบ
+      </a>
+    </div>
+  </aside>
+
+  <div class="slip-main">
+
+    <nav class="navbar navbar-expand-lg slip-navbar mb-4 d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center gap-3">
+        <h5 class="mb-0 fw-bold" style="color: var(--text-main);"> Slip-H2o ยินดีต้อนรับ</h5>
+      </div>
+
+      <div class="d-flex align-items-center gap-3">
+        
+        <div class="expire-badge">
+            <i class="bi bi-hourglass-split expire-icon"></i>
+            <div class="d-flex flex-column text-start" style="line-height: 1.1;">
+                <span style="font-size: 0.7rem; color: var(--text-muted);">เวลาใช้งานคงเหลือ</span>
+                <span class="fw-bold" id="timeLeftDisplay" style="font-size: 0.85rem; color: var(--text-main);">กำลังโหลดข้อมูล...</span>
+            </div>
+        </div>
+
+        <button id="themeToggleBtn" class="btn btn-theme-toggle rounded-pill px-4 py-2 fw-medium">
+          <i class="bi bi-moon-stars-fill me-2" id="themeIcon"></i>
+          <span id="themeText">สลับธีม</span>
+        </button>
+      </div>
+    </nav>
+
+    <div class="container-fluid p-0 text-center">
+
+      <div class="tab-switcher">
+          <button class="tab-btn active" onclick="switchSection('slip', this)">
+              <i class="bi bi-receipt"></i> สลิปรายการโอนเงิน
+          </button>
+          <button class="tab-btn" onclick="switchSection('notify', this)">
+              <i class="bi bi-bell-fill"></i> แจ้งเตือนรายการเงินเข้า
+          </button>
+      </div>
+
+      <div class="slip-card mb-4" id="section-slip">
+        <div class="app-section-header text-center mb-2">
+          <h5>เลือกรูปแบบสลิปโอนเงิน</h5>
+        </div>
+        <div class="provider-grid">
+          <a href="slip_kbank.html" class="provider-item" data-preview="assets/image/preview/ex_kbank.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/p-kbank.png" class="provider-logo-img"></div><div class="text-muted-soft">สลิป กสิกรไทย</div></a>
+          <a href="slip_scb.html" class="provider-item" data-preview="assets/image/preview/ex_scb.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/p-scb.png" class="provider-logo-img"></div><div class="text-muted-soft">สลิป ไทยพาณิชย์</div></a>
+          <a href="slip_ktb.html" class="provider-item" data-preview="assets/image/preview/ex_ktb.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/p-kt.png" class="provider-logo-img"></div><div class="text-muted-soft">สลิป กรุงไทย</div></a>
+          <a href="slip_bay.html" class="provider-item" data-preview="assets/image/preview/ex_bay.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/p-kung.png" class="provider-logo-img"></div><div class="text-muted-soft">สลิป กรุงศรี</div></a>
+          <a href="slip_bbl.html" class="provider-item" data-preview="assets/image/preview/ex_bbl.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/p-bl.png" class="provider-logo-img"></div><div class="text-muted-soft">สลิป กรุงเทพ</div></a>
+          <a href="slip_ttb.html" class="provider-item" data-preview="assets/image/preview/ex_ttb.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/p-ttb.png" class="provider-logo-img"></div><div class="text-muted-soft">สลิป TTB</div></a>
+          <a href="slip_gsb.html" class="provider-item" data-preview="assets/image/preview/ex_gsb.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/p-o.png" class="provider-logo-img"></div><div class="text-muted-soft">สลิป ออมสิน</div></a>
+          <a href="slip_kkp.html" class="provider-item" data-preview="assets/image/preview/ex_kkp.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/p-kpp.png" class="provider-logo-img"></div><div class="text-muted-soft">สลิป KKP</div></a>
+          <a href="slip_cimb.html" class="provider-item" data-preview="assets/image/preview/ex_cimb.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/p-cimb.png" class="provider-logo-img"></div><div class="text-muted-soft">สลิป CIMB</div></a>
+          <a href="slip_baac.html" class="provider-item" data-preview="assets/image/preview/ex_baac.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/p-tks.png" class="provider-logo-img"></div><div class="text-muted-soft">สลิป ธ.ก.ส.</div></a>
+          <a href="slip_linebk.html" class="provider-item" data-preview="assets/image/preview/ex_linebk.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/p-linebk.png" class="provider-logo-img"></div><div class="text-muted-soft">สลิป LINE BK</div></a>
+          <a href="slip_make.html" class="provider-item" data-preview="assets/image/preview/ex_make.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/p-make.png" class="provider-logo-img"></div><div class="text-muted-soft">สลิป MAKE</div></a>
+        </div>
+      </div>
+
+      <div class="slip-card mb-4" id="section-notify" style="display: none;">
+        <div class="app-section-header text-center mb-2">
+          <h5>เลือกรูปแบบแจ้งเตือนเงินเข้าแต่ละธนาคาร</h5>
+        </div>
+        <div class="provider-grid">
+            <a href="notify_kbank1.html" class="provider-item" data-preview="assets/image/preview/ex_notify1.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/mb1.png" class="provider-logo-img"></div><div class="text-muted-soft">KBank แจ้งเตือน 1</div></a>
+            <a href="notify_kbank2.html" class="provider-item" data-preview="assets/image/preview/ex_notify1.1.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/mb1.png" class="provider-logo-img"></div><div class="text-muted-soft">KBank แจ้งเตือน 2</div></a>
+            <a href="notify_kbank3.html" class="provider-item" data-preview="assets/image/preview/ex_notify1.2.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/mb1.png" class="provider-logo-img"></div><div class="text-muted-soft">KBank ถอน 2 ยอด</div></a>
+            <a href="notify_kbank4.html" class="provider-item" data-preview="assets/image/preview/ex_notify1.3.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/mb1.png" class="provider-logo-img"></div><div class="text-muted-soft">KBank แจ้งเตือน 4</div></a>
+            <a href="notify_kbank5.html" class="provider-item" data-preview="assets/image/preview/ex_notify1.4.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/mb1.png" class="provider-logo-img"></div><div class="text-muted-soft">KBank แจ้งเตือน 5</div></a>
+            
+            <a href="notify_scb1.html" class="provider-item" data-preview="assets/image/preview/ex_notify2.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/mb9.png" class="provider-logo-img"></div><div class="text-muted-soft">SCB แจ้งเตือน 1</div></a>
+            <a href="notify_scb2.html" class="provider-item" data-preview="assets/image/preview/ex_notify2.1.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/mb9.png" class="provider-logo-img"></div><div class="text-muted-soft">SCB แจ้งเตือน 2</div></a>
+            <a href="notify_scb3.html" class="provider-item" data-preview="assets/image/preview/ex_notify2.2.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/mb9.png" class="provider-logo-img"></div><div class="text-muted-soft">SCB  ถอน 2 ยอด</div></a>
+            <a href="notify_scb4.html" class="provider-item" data-preview="assets/image/preview/ex_notify2.3.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/mb9.png" class="provider-logo-img"></div><div class="text-muted-soft">SCB แจ้งเตือน 4</div></a>
+            
+            <a href="notify_ktb1.html" class="provider-item" data-preview="assets/image/preview/ex_notify3.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/mb5.png" class="provider-logo-img"></div><div class="text-muted-soft">กรุงไทย แจ้งเตือน 1</div></a>
+            <a href="notify_ktb2.html" class="provider-item" data-preview="assets/image/preview/ex_notify3.1.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/mb5.png" class="provider-logo-img"></div><div class="text-muted-soft">กรุงไทย แจ้งเตือน 2</div></a>
+            <a href="notify_ktb3.html" class="provider-item" data-preview="assets/image/preview/ex_notify3.2.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/mb5.png" class="provider-logo-img"></div><div class="text-muted-soft">กรุงไทย แจ้งเตือน 3</div></a>
+            <a href="notify_ktb4.html" class="provider-item" data-preview="assets/image/preview/ex_notify3.3.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/mb5.png" class="provider-logo-img"></div><div class="text-muted-soft">กรุงไทย ถอน 2 ยอด</div></a>
+            <a href="notify_ktb5.html" class="provider-item" data-preview="assets/image/preview/ex_notify3.4.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/mb5.png" class="provider-logo-img"></div><div class="text-muted-soft">กรุงไทย แจ้งเตือน 5</div></a>
+
+            <a href="notify_bay1.html" class="provider-item" data-preview="assets/image/preview/ex_notify4.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/mb2.png" class="provider-logo-img"></div><div class="text-muted-soft">กรุงศรี แจ้งเตือน 1</div></a>
+            <a href="notify_bay2.html" class="provider-item" data-preview="assets/image/preview/ex_notify4.1.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/mb2.png" class="provider-logo-img"></div><div class="text-muted-soft">กรุงศรี แจ้งเตือน 2</div></a>
+            <a href="notify_bay3.html" class="provider-item" data-preview="assets/image/preview/ex_notify4.2.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/mb2.png" class="provider-logo-img"></div><div class="text-muted-soft">กรุงศรี แจ้งเตือน 3</div></a>
+
+            <a href="notify_bbl1.html" class="provider-item" data-preview="assets/image/preview/ex_notify5.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/mb10.png" class="provider-logo-img"></div><div class="text-muted-soft">กรุงเทพ แจ้งเตือน 1</div></a>
+            <a href="notify_bbl2.html" class="provider-item" data-preview="assets/image/preview/ex_notify5.1.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/mb10.png" class="provider-logo-img"></div><div class="text-muted-soft">กรุงเทพ แจ้งเตือน 2</div></a>
+
+            <a href="notify_ttb1.html" class="provider-item" data-preview="assets/image/preview/ex_notify6.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/mb11.png" class="provider-logo-img"></div><div class="text-muted-soft">ธนชาต แจ้งเตือน 1</div></a>
+            <a href="notify_ttb2.html" class="provider-item" data-preview="assets/image/preview/ex_notify6.1.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/mb11.png" class="provider-logo-img"></div><div class="text-muted-soft">ธนชาต แจ้งเตือน 2</div></a>
+            <a href="notify_ttb3.html" class="provider-item" data-preview="assets/image/preview/ex_notify6.2.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/mb11.png" class="provider-logo-img"></div><div class="text-muted-soft">ธนชาต แจ้งเตือน 3</div></a>
+
+            <a href="notify_gsb1.html" class="provider-item" data-preview="assets/image/preview/ex_notify7.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/mb6.png" class="provider-logo-img"></div><div class="text-muted-soft">ออมสิน แจ้งเตือน 1</div></a>
+            <a href="notify_gsb2.html" class="provider-item" data-preview="assets/image/preview/ex_notify7.1.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/mb6.png" class="provider-logo-img"></div><div class="text-muted-soft">ออมสิน แจ้งเตือน 2</div></a>
+
+            <a href="notify_baac1.html" class="provider-item" data-preview="assets/image/preview/ex_notify8.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/mb8.png" class="provider-logo-img"></div><div class="text-muted-soft">BAAC แจ้งเตือน 1</div></a>
+
+            <a href="notify_linebk.html" class="provider-item" data-preview="assets/image/preview/ex_notify9.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/mb3.png" class="provider-logo-img"></div><div class="text-muted-soft">LINE BK แจ้งเตือน</div></a>
+            <a href="notify_make.html" class="provider-item" data-preview="assets/image/preview/ex_notify10.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/mb7.png" class="provider-logo-img"></div><div class="text-muted-soft">MAKE แจ้งเตือน</div></a>
+            <a href="notify_kkp.html" class="provider-item" data-preview="assets/image/preview/ex_notify11.png"><div class="provider-logo-wrap"><img src="assets/image/logo1/mb4.png" class="provider-logo-img"></div><div class="text-muted-soft">KKP แจ้งเตือน</div></a>
+        </div>
+      </div>
+
+    </div>
+
+    <footer class="text-center mt-4 mb-3">
+      <p style="color: var(--text-muted); font-size: 0.9rem;"> 999 pH2o</p>
+    </footer>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    function switchSection(sectionId, btnElement) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        btnElement.classList.add('active');
+
+        if (sectionId === 'slip') {
+            document.getElementById('section-slip').style.display = 'block';
+            document.getElementById('section-notify').style.display = 'none';
+
+            if(!document.getElementById('menuSlips').classList.contains('show')) new bootstrap.Collapse(document.getElementById('menuSlips')).show();
+            if(document.getElementById('menuNotify').classList.contains('show')) new bootstrap.Collapse(document.getElementById('menuNotify')).hide();
+            document.querySelector('[href="#menuSlips"]').setAttribute('aria-expanded', 'true');
+            document.querySelector('[href="#menuNotify"]').setAttribute('aria-expanded', 'false');
+        } else {
+            document.getElementById('section-slip').style.display = 'none';
+            document.getElementById('section-notify').style.display = 'block';
+
+            if(!document.getElementById('menuNotify').classList.contains('show')) new bootstrap.Collapse(document.getElementById('menuNotify')).show();
+            if(document.getElementById('menuSlips').classList.contains('show')) new bootstrap.Collapse(document.getElementById('menuSlips')).hide();
+            document.querySelector('[href="#menuNotify"]').setAttribute('aria-expanded', 'true');
+            document.querySelector('[href="#menuSlips"]').setAttribute('aria-expanded', 'false');
+        }
+    }
+
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const themeIcon = document.getElementById('themeIcon');
+    const themeText = document.getElementById('themeText');
+    const body = document.body;
+
+    themeText.innerText = "สลับธีม";
+    themeIcon.className = 'bi bi-moon-stars-fill me-2';
+
+    themeToggleBtn.addEventListener('click', () => {
+        body.classList.toggle('theme-dark'); 
+        
+        if (body.classList.contains('theme-dark')) {
+            themeIcon.className = 'bi bi-brightness-high-fill me-2';
+            themeIcon.style.color = "#f59e0b"; 
+            themeText.innerText = "สลับธีม";
+        } else {
+            themeIcon.className = 'bi bi-moon-stars-fill me-2';
+            themeIcon.style.color = "inherit";
+            themeText.innerText = "สลับธีม";
+        }
+    });
+
+    const tooltip = document.getElementById('previewTooltip');
+    const previewImg = document.getElementById('previewImage');
+    const providerItems = document.querySelectorAll('.provider-item');
+
+    providerItems.forEach(item => {
+        item.addEventListener('mouseenter', (e) => {
+            const imgSrc = item.getAttribute('data-preview');
+            if (imgSrc) {
+                previewImg.src = imgSrc;
+                tooltip.classList.add('show');
+            }
+        });
+
+        item.addEventListener('mousemove', (e) => {
+            tooltip.style.left = (e.clientX + 20) + 'px';
+            tooltip.style.top = (e.clientY + 20) + 'px';
+        });
+
+        item.addEventListener('mouseleave', () => {
+            tooltip.classList.remove('show');
+            previewImg.src = '';
+        });
+    });
+</script>
+
+<script src="js/utils.js"></script>
+<script src="js/security.js"></script>
+<script type="module" src="js/backend-auth.js"></script>
+
+</body>
+</html>
