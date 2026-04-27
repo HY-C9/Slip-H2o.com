@@ -450,12 +450,12 @@
     function autoFormatAccount() {
         const bank = document.getElementById('bank').value;
         const accInput = document.getElementById('receiveraccount');
-        if (bank === 'ออมสิน' || bank === 'ธ.ก.ส.') accInput.value = 'XXX-X-XX000-0';
+        if (bank === 'ออมสิน' || bank === 'ธ.ก.ส.') accInput.value = 'XXX-X-XXXX0-000';
         else if (bank === 'พร้อมเพย์') accInput.value = 'XXX XXX 0000';
         else if (bank === 'พร้อมเพย์ ') accInput.value = 'X XXXX XXXX0 00 0';
         else if (bank === 'พร้อมเพย์  ') accInput.value = 'XXX-XXXXXXXX-0000';
         else if (bank === 'ChillPay') accInput.value = '(010553509091216)';
-        else accInput.value = 'XXX-X-XX142-6';
+        else accInput.value = 'XXX-X-XX000-0';
     }
 
     function syncNoteBackground() {
