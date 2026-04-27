@@ -163,7 +163,7 @@
           <div class="d-flex flex-column gap-1 mt-1 mb-3 ms-3 ps-3 border-start border-secondary border-opacity-25">
               <a href="notify_kbank1.html" class="sidebar-link sub-link" data-preview="assets/image/preview/ex_notify1.png"><img src="assets/image/logo1/mb1.png" class="sidebar-icon-img"> KBank แจ้งเตือน 1</a>
               <a href="notify_kbank2.html" class="sidebar-link sub-link" data-preview="assets/image/preview/ex_notify1.1.png"><img src="assets/image/logo1/mb1.png" class="sidebar-icon-img"> KBank แจ้งเตือน 2</a>
-              <a href="notify_kbank3.html" class="sidebar-link sub-link" data-preview="assets/image/preview/ex_notify1.2.png"><img src="assets/image/logo1/mb1.png" class="sidebar-icon-img"> KBank ถอน 2 ยอด</a>
+              <a href="notify_kbank3.html" class="sidebar-link sub-link" data-preview="assets/image/preview/ex_notify1.2.png"><img src="assets/image/logo1/mb1.png" class="sidebar-icon-img"> KBank แจ้งเตือน 3</a>
               <a href="notify_kbank4.html" class="sidebar-link sub-link" data-preview="assets/image/preview/ex_notify1.3.png"><img src="assets/image/logo1/mb1.png" class="sidebar-icon-img"> KBank แจ้งเตือน 4</a>
               <a href="notify_kbank5.html" class="sidebar-link sub-link" data-preview="assets/image/preview/ex_notify1.4.png"><img src="assets/image/logo1/mb1.png" class="sidebar-icon-img"> KBank แจ้งเตือน 5</a>
               
@@ -249,8 +249,10 @@
 
             <div class="alert-custom">
                 <i class="bi bi-info-circle-fill me-2"></i> <strong>รูปแบบเลขบัญชี:</strong><br>
-                <span class="ms-4">10 หลัก: XXX-X-XX000-0 | 12 หลัก: XXX-X-XXXX0-000</span><br>
-                <span class="ms-4">พร้อมเพย์: XXX XXX 0000 | บัตรประชาชน: X XXXX XXXX0 00 0</span><br>
+                <span class="ms-4">10 หลัก: XXX-X-XX000-0</span><br>
+                <span class="ms-4">12 หลัก: XXX-X-XXXX0-000</span><br>
+                <span class="ms-4">พร้อมเพย์: XXX XXX 0000</span><br>
+                <span class="ms-4"></span>บัตรประชาชน: X XXXX XXXX0 00 0</span><br>
                 <span class="ms-4">วอเลท: XXX-XXXXXXXX-0000</span><br>
                 <span class="ms-4">ChillPay: (010553509091216)</span>
             </div>
@@ -448,12 +450,12 @@
     function autoFormatAccount() {
         const bank = document.getElementById('bank').value;
         const accInput = document.getElementById('receiveraccount');
-        if (bank === 'ออมสิน' || bank === 'ธ.ก.ส.') accInput.value = 'XXX-X-XX000-0';
+        if (bank === 'ออมสิน' || bank === 'ธ.ก.ส.') accInput.value = 'XXX-X-XXXX0-000';
         else if (bank === 'พร้อมเพย์') accInput.value = 'XXX XXX 0000';
         else if (bank === 'พร้อมเพย์ ') accInput.value = 'X XXXX XXXX0 00 0';
         else if (bank === 'พร้อมเพย์  ') accInput.value = 'XXX-XXXXXXXX-0000';
         else if (bank === 'ChillPay') accInput.value = '(010553509091216)';
-        else accInput.value = 'XXX-X-XX142-6';
+        else accInput.value = 'XXX-X-XX000-0';
     }
 
     function syncNoteBackground() {
