@@ -106,6 +106,11 @@
         .btn-outline-warning { border-color: var(--warning-color); color: var(--warning-color); background: transparent; height: 36px; line-height: 1; padding: 0 15px; font-size: 0.85rem;}
         .btn-warning { background-color: var(--warning-color); color: #000; border-color: var(--warning-color); height: 36px; line-height: 1; padding: 0 15px; font-size: 0.85rem;}
 
+        /* โซนอัปโหลดพื้นหลัง */
+        .bg-zone { transition: all 0.3s; border-width: 2px !important; }
+        .upload-zone { border: 2px dashed var(--card-border); background: rgba(255, 255, 255, 0.05); cursor: pointer; transition: all 0.3s; outline: none; }
+        .upload-zone:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--warning-color); }
+
         .preview-tooltip {
             position: fixed; pointer-events: none; z-index: 9999;
             opacity: 0; visibility: hidden; transform: translateY(10px) scale(0.95);
@@ -247,44 +252,11 @@
             </div>
 
             <div class="form-section-card">
-                <div class="form-section-title"><i class="bi bi-phone fs-5"></i> ตั้งค่าโทรศัพท์ & พื้นหลัง</div>
+                <div class="form-section-title"><i class="bi bi-phone fs-5"></i> ตั้งค่าโทรศัพท์</div>
                 <div class="row g-3 align-items-end">
-                    <div class="col-md-6">
-                        <label for="datetime_plus_one" class="form-label">เวลาบนหน้าจอมือถือ</label>
+                    <div class="col-md-12">
+                        <label for="datetime_plus_one" class="form-label">เวลาบนหน้าจอมือถือ (มุมซ้ายบน)</label>
                         <input type="time" class="form-control" id="datetime_plus_one" required oninput="if(window.updateDisplay) window.updateDisplay();">
-                    </div>
-                    <div class="col-md-6">
-                        <label for="backgroundSelect" class="form-label">เลือกพื้นหลัง</label>
-                        <select id="backgroundSelect" name="backgroundSelect" class="form-select" onchange="if(window.updateDisplay) window.updateDisplay();">
-                            <option value="assets/image/bs/backgroundEnter-KB4.1.jpg">มินิมอล</option>
-                            <option value="assets/image/bs/backgroundEnter-KB4.2.jpg">ชินจัง1</option>
-                            <option value="assets/image/bs/backgroundEnter-KB4.3.jpg">ฟุตบอล จู๊ด</option>
-                            <option value="assets/image/bs/backgroundEnter-KB4.4.jpg">ฟุตบอล มาดริด</option>
-                            <option value="assets/image/bs/backgroundEnter-KB4.16.jpg">ฟุตบอล โซโบสไล</option>
-                            <option value="assets/image/bs/backgroundEnter-KB4.5.jpg">หมีชมพู</option>
-                            <option value="assets/image/bs/backgroundEnter-KB4.6.jpg">แมวโอโม่</option>
-                            <option value="assets/image/bs/backgroundEnter-KB4.7.jpg">WINTER AESPA</option>
-                            <option value="assets/image/bs/backgroundEnter-KB4.8.jpg">KARINA AESPA</option>
-                            <option value="assets/image/bs/backgroundEnter-KB4.9.jpg">JangWonyoung</option>
-                            <option value="assets/image/bs/backgroundEnter-KB4.10.jpg">การ์ฟิวส์</option>
-                            <option value="assets/image/bs/backgroundEnter-KB4.11.jpg">Haerin so cool</option>
-                            <option value="assets/image/bs/backgroundEnter-KB4.12.jpg">Haerin LUV</option>
-                            <option value="assets/image/bs/backgroundEnter-KB4.13.jpg">ดิสนีย์</option>
-                            <option value="assets/image/bs/backgroundEnter-KB4.14.jpg">สีสวาด</option>
-                            <option value="assets/image/bs/backgroundEnter-KB4.15.jpg">แก๊งค์เมี๊ยวสิบขา</option>
-                            <option value="assets/image/bs/backgroundEnter-KB4.17.jpg">น้องเนย</option>
-                            <option value="assets/image/bs/backgroundEnter-KB4.18.jpg">Imaginative home</option>
-                            <option value="assets/image/bs/backgroundEnter-KB4.19.jpg">City at Night</option>
-                            <option value="assets/image/bs/backgroundEnter-KB4.20.jpg">ร้านยากินิกุ</option>
-                            <option value="assets/image/bs/backgroundEnter-KB4.21.jpg">Pickles House</option>
-                            <option value="assets/image/bs/backgroundEnter-KB4.22.jpg">แดดอุ่นๆ+คาเฟ่=ความสุข</option>
-                            <option value="assets/image/bs/backgroundEnter-KB4.23.jpg">ฟาวเวอร์ ฟอร์ยู</option>
-                            <option value="assets/image/bs/backgroundEnter-KB4.24.jpg">เติมความสุขที่แฟมิลี่มาร์ท</option>
-                            <option value="assets/image/bs/backgroundEnter-KB4.25.jpg">SUNFLOWERs</option>
-                            <option value="assets/image/bs/backgroundEnter-KB4.26.jpg">cliff of lighthouse</option>
-                            <option value="assets/image/bs/backgroundEnter-KB4.27.jpg">ฝูงนกอิสรภาพ</option>
-                            <option value="assets/image/bs/backgroundEnter-KB4.28.jpg">แมวกลางชายหาด</option>
-                        </select>
                     </div>
                     <div class="col-12 mt-3">
                         <div class="d-flex justify-content-between align-items-center mb-1">
@@ -293,6 +265,63 @@
                         </div>
                         <input type="range" class="form-range" id="battery" name="battery" min="0" max="100" value="100" oninput="updateBatteryUI(); if(window.updateDisplay) window.updateDisplay();">
                     </div>
+                </div>
+            </div>
+
+            <input type="hidden" id="activeBgMode" value="system">
+            <input type="hidden" id="customImageDataUrl" value="">
+            
+            <div class="form-section-card">
+                <div class="form-section-title"><i class="bi bi-images fs-5"></i> ภาพพื้นหลัง (Background)</div>
+                
+                <div id="sysZone" class="mb-3 p-3 rounded border-success bg-success bg-opacity-10 bg-zone border">
+                    <label for="backgroundSelect" class="form-label text-success fw-bold" id="sysLabel">
+                        <i class="bi bi-check-circle-fill me-1" id="sysIcon"></i> 1. ใช้พื้นหลังระบบ
+                    </label>
+                    <select class="form-select border-success" id="backgroundSelect" name="backgroundSelect" onchange="activateSystemMode()">
+                        <option value="assets/image/bs/backgroundEnter-KB4.1.jpg">มินิมอล</option>
+                        <option value="assets/image/bs/backgroundEnter-KB4.2.jpg">ชินจัง1</option>
+                        <option value="assets/image/bs/backgroundEnter-KB4.3.jpg">ฟุตบอล จู๊ด</option>
+                        <option value="assets/image/bs/backgroundEnter-KB4.4.jpg">ฟุตบอล มาดริด</option>
+                        <option value="assets/image/bs/backgroundEnter-KB4.16.jpg">ฟุตบอล โซโบสไล</option>
+                        <option value="assets/image/bs/backgroundEnter-KB4.5.jpg">หมีชมพู</option>
+                        <option value="assets/image/bs/backgroundEnter-KB4.6.jpg">แมวโอโม่</option>
+                        <option value="assets/image/bs/backgroundEnter-KB4.7.jpg">WINTER AESPA</option>
+                        <option value="assets/image/bs/backgroundEnter-KB4.8.jpg">KARINA AESPA</option>
+                        <option value="assets/image/bs/backgroundEnter-KB4.9.jpg">JangWonyoung</option>
+                        <option value="assets/image/bs/backgroundEnter-KB4.10.jpg">การ์ฟิวส์</option>
+                        <option value="assets/image/bs/backgroundEnter-KB4.11.jpg">Haerin so cool</option>
+                        <option value="assets/image/bs/backgroundEnter-KB4.12.jpg">Haerin LUV</option>
+                        <option value="assets/image/bs/backgroundEnter-KB4.13.jpg">ดิสนีย์</option>
+                        <option value="assets/image/bs/backgroundEnter-KB4.14.jpg">สีสวาด</option>
+                        <option value="assets/image/bs/backgroundEnter-KB4.15.jpg">แก๊งค์เมี๊ยวสิบขา</option>
+                        <option value="assets/image/bs/backgroundEnter-KB4.17.jpg">น้องเนย</option>
+                        <option value="assets/image/bs/backgroundEnter-KB4.18.jpg">Imaginative home</option>
+                        <option value="assets/image/bs/backgroundEnter-KB4.19.jpg">City at Night</option>
+                        <option value="assets/image/bs/backgroundEnter-KB4.20.jpg">ร้านยากินิกุ</option>
+                        <option value="assets/image/bs/backgroundEnter-KB4.21.jpg">Pickles House</option>
+                        <option value="assets/image/bs/backgroundEnter-KB4.22.jpg">แดดอุ่นๆ+คาเฟ่=ความสุข</option>
+                        <option value="assets/image/bs/backgroundEnter-KB4.23.jpg">ฟาวเวอร์ ฟอร์ยู</option>
+                        <option value="assets/image/bs/backgroundEnter-KB4.24.jpg">เติมความสุขที่แฟมิลี่มาร์ท</option>
+                        <option value="assets/image/bs/backgroundEnter-KB4.25.jpg">SUNFLOWERs</option>
+                        <option value="assets/image/bs/backgroundEnter-KB4.26.jpg">cliff of lighthouse</option>
+                        <option value="assets/image/bs/backgroundEnter-KB4.27.jpg">ฝูงนกอิสรภาพ</option>
+                        <option value="assets/image/bs/backgroundEnter-KB4.28.jpg">แมวกลางชายหาด</option>
+                    </select>
+                </div>
+
+                <div id="customZone" class="p-3 rounded border-secondary opacity-75 bg-zone border">
+                    <label class="form-label text-secondary fw-bold" id="customLabel">
+                        <i class="bi bi-circle me-1" id="customIcon"></i> 2. หรืออัปโหลดรูปของคุณเอง
+                    </label>
+                    <div id="pasteDropZone" class="text-center p-3 mb-2 rounded shadow-sm upload-zone" tabindex="0">
+                        <i class="bi bi-clipboard-data" style="font-size: 2rem; color: var(--warning-color);"></i>
+                        <div style="font-size: 0.85rem; margin-top: 10px; color: var(--text-main); font-weight: 500;">
+                            คลิกที่นี่ แล้วกด <kbd class="bg-dark text-white px-2 py-1 rounded">Ctrl</kbd> + <kbd class="bg-dark text-white px-2 py-1 rounded">V</kbd> เพื่อวางรูป
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">(หรือลากไฟล์รูปมาวาง)</div>
+                    </div>
+                    <input type="file" class="form-control text-secondary" id="customBackgroundInput" accept="image/png, image/jpeg">
                 </div>
             </div>
 
@@ -348,7 +377,6 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    // 🛑 กำหนดป้ายกำกับว่าหน้านี้คือ แจ้งเตือน KBANK 4
     window.CURRENT_BANK = "NOTIFY_KBANK4";
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -415,8 +443,100 @@
         if (typeof window.updateDisplay === 'function') window.updateDisplay();
     };
 
+    // ฟังก์ชันเปิดการทำงานพื้นหลังระบบ
+    window.activateSystemMode = function() {
+        document.getElementById('activeBgMode').value = 'system';
+        document.getElementById('sysZone').className = "mb-3 p-3 rounded border-success bg-success bg-opacity-10 bg-zone border";
+        document.getElementById('sysLabel').className = "form-label text-success fw-bold";
+        document.getElementById('sysIcon').className = "bi bi-check-circle-fill me-1";
+        document.getElementById('backgroundSelect').className = "form-select border-success";
+        
+        document.getElementById('customZone').className = "p-3 rounded border-secondary opacity-75 bg-zone border";
+        document.getElementById('customLabel').className = "form-label text-secondary fw-bold";
+        document.getElementById('customIcon').className = "bi bi-circle me-1";
+        document.getElementById('customBackgroundInput').className = "form-control text-secondary border-secondary";
+
+        if(window.updateDisplay) window.updateDisplay();
+    }
+
+    // ฟังก์ชันเปิดการทำงานภาพพื้นหลังแบบเลือกเอง
+    window.activateCustomMode = function() {
+        document.getElementById('activeBgMode').value = 'custom';
+        document.getElementById('sysZone').className = "mb-3 p-3 rounded border-secondary opacity-75 bg-zone border";
+        document.getElementById('sysLabel').className = "form-label text-secondary fw-bold";
+        document.getElementById('sysIcon').className = "bi bi-circle me-1";
+        document.getElementById('backgroundSelect').className = "form-select border-secondary text-secondary";
+        
+        document.getElementById('customZone').className = "p-3 rounded border-warning bg-warning bg-opacity-10 bg-zone border";
+        document.getElementById('customLabel').className = "form-label text-warning fw-bold";
+        document.getElementById('customIcon').className = "bi bi-check-circle-fill me-1";
+        document.getElementById('customBackgroundInput').className = "form-control text-warning border-warning";
+
+        if(window.updateDisplay) window.updateDisplay();
+    }
+
+    // จัดการไฟล์รูปที่ถูกลากมาวาง หรือ Ctrl+V
+    const setupCustomImage = function(file) {
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                document.getElementById('customImageDataUrl').value = event.target.result;
+                activateCustomMode();
+
+                const dropZone = document.getElementById('pasteDropZone');
+                const originalBg = dropZone.style.background;
+                const originalBorder = dropZone.style.borderColor;
+                dropZone.style.background = 'rgba(0, 169, 80, 0.2)';
+                dropZone.style.borderColor = '#00a950';
+                setTimeout(() => {
+                    dropZone.style.background = originalBg;
+                    dropZone.style.borderColor = originalBorder;
+                }, 400);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    // กดเลือกไฟล์รูป
+    document.getElementById('customBackgroundInput').addEventListener('change', function(e) {
+        setupCustomImage(e.target.files[0]);
+    });
+
+    // วางรูปลงกล่อง (เฉพาะเจาะจงที่กล่องพื้นหลัง)
+    document.getElementById('pasteDropZone').addEventListener('paste', function(e) {
+        const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+        for (let index in items) {
+            const item = items[index];
+            if (item.kind === 'file' && item.type.startsWith('image/')) {
+                const blob = item.getAsFile();
+                setupCustomImage(blob);
+                e.preventDefault();
+                e.stopPropagation(); // ไม่ให้ไปชนกับการวาง QR Code ที่ JS หลัก
+                break;
+            }
+        }
+    });
+
+    // ลากรูปมาวาง
+    const dropZone = document.getElementById('pasteDropZone');
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.style.background = 'rgba(255, 255, 255, 0.1)';
+    });
+    dropZone.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        dropZone.style.background = 'rgba(245, 158, 11, 0.05)';
+    });
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            setupCustomImage(e.dataTransfer.files[0]);
+        }
+    });
+
     window.clearForm = function() {
         if(document.getElementById('backgroundSelect')) document.getElementById('backgroundSelect').selectedIndex = 0;
+        if(document.getElementById('customImageDataUrl')) document.getElementById('customImageDataUrl').value = '';
         
         if(document.getElementById('senderaccount1')) document.getElementById('senderaccount1').value = 'xxx-x-x3041-x';
         if(document.getElementById('money01')) document.getElementById('money01').value = '16,000.20';
@@ -437,6 +557,7 @@
         }
         
         if(isPowerSaving) togglePowerSavingMode();
+        if(window.activateSystemMode) activateSystemMode(); // คืนค่าโหมดรูปพื้นหลังเดิม
         
         if(window.updateDisplay) window.updateDisplay();
     };
@@ -464,6 +585,28 @@
             previewImg.src = '';
         });
     });
+
+    // 🟢 เพิ่มระบบเซฟข้อมูลลงในเครื่อง (Local Storage) สำหรับกสิกร 4
+    window.saveFavoriteToCloud = function() {
+        try {
+            const data = {
+                senderaccount1: document.getElementById('senderaccount1')?.value || '',
+                money01: document.getElementById('money01')?.value || '',
+                money02: document.getElementById('money02')?.value || '',
+                activeBgMode: document.getElementById('activeBgMode')?.value || 'system',
+                backgroundSelect: document.getElementById('backgroundSelect')?.value || '',
+                customImageDataUrl: document.getElementById('customImageDataUrl')?.value || ''
+            };
+            
+            const saveKey = (window.CURRENT_BANK || 'NOTIFY_KBANK4') + '_SAVED_DATA';
+            localStorage.setItem(saveKey, JSON.stringify(data));
+            
+            alert('บันทึกข้อมูลและรูปพื้นหลังเรียบร้อยแล้ว!');
+        } catch(e) {
+            alert('เกิดข้อผิดพลาด: ไฟล์รูปอาจมีขนาดใหญ่เกินไป');
+            console.error(e);
+        }
+    };
 </script>
 
 <script src="js/utils.js"></script>
