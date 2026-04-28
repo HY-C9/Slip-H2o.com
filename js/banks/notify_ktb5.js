@@ -1,184 +1,210 @@
- (function() {
-    let qrCodeImage = null;
+(function() {
     let powerSavingMode = false;
+    let cachedBgImage = new Image();
     let currentBgSrc = '';
-    const imageCache = {};
-
-    function getCachedImage(src) {
-        if (!src) return null;
-        if (!imageCache[src]) {
-            const img = new Image();
-            img.onload = () => {
-                if (typeof window.updateDisplay === 'function') window.updateDisplay();
-            };
-            img.src = src;
-            imageCache[src] = img;
-        }
-        return imageCache[src];
-    }
-
-    getCachedImage('assets/image/bs/backgroundEnter-KT6.1.jpg');
-    getCachedImage('assets/image/icon/icona.png');
 
     function loadFonts() {
         const fonts = [
             new FontFace('SFThonburiLight', 'url(assets/fonts/SFThonburi.woff)'),
             new FontFace('SFThonburiRegular', 'url(assets/fonts/SFThonburi-Regular.woff)'),
             new FontFace('SFThonburiSemiBold', 'url(assets/fonts/SFThonburi-Semibold.woff)'),
-            new FontFace('SFThonburiBold', 'url(assets/fonts/SFThonburi-Bold.woff)'),
-            new FontFace('SarabunThin', 'url(assets/fonts/Sarabun-Thin.woff)'),
-            new FontFace('SarabunExtraLight', 'url(assets/fonts/Sarabun-ExtraLight.woff)'),
-            new FontFace('SarabunLight', 'url(assets/fonts/Sarabun-Light.woff)'),
-            new FontFace('SarabunRegular', 'url(assets/fonts/Sarabun-Regular.woff)'),
-            new FontFace('SarabunMedium', 'url(assets/fonts/Sarabun-Medium.woff)'),
-            new FontFace('SarabunSemiBold', 'url(assets/fonts/Sarabun-SemiBold.woff)'),
-            new FontFace('SarabunBold', 'url(assets/fonts/Sarabun-Bold.woff)'),
-            new FontFace('SarabunExtraBold', 'url(assets/fonts/Sarabun-ExtraBold.woff)')
+            new FontFace('SFThonburiBold', 'url(assets/fonts/SFThonburi-Bold.woff)')
         ];
 
         return Promise.allSettled(fonts.map(font => font.load())).then(results => {
-            results.forEach(result => {
-                if (result.status === 'fulfilled') document.fonts.add(result.value);
+            results.forEach((result, index) => {
+                if (result.status === 'fulfilled') {
+                    document.fonts.add(result.value);
+                }
             });
         });
-    }
-
-    window.onload = function() {
-        setCurrentDateTime();
-        loadFonts().then(() => {
-            document.fonts.ready.then(() => {
-                if (typeof window.updateDisplay === 'function') window.updateDisplay();
-            });
-        }).catch(() => {
-            if (typeof window.updateDisplay === 'function') window.updateDisplay();
-        });
-    };
-
-    function setCurrentDateTime() {
-        const now = new Date();
-        const localDateTime = now.toLocaleString('sv-SE', { timeZone: 'Asia/Bangkok', hour12: false });
-        
-        const dt = document.getElementById('datetime');
-        if (dt) dt.value = localDateTime.substring(0, 16);
-        const dt1 = document.getElementById('datetime1');
-        if (dt1) dt1.value = localDateTime.substring(0, 16);
-
-        const oneMinuteLater = new Date(now.getTime() + 60000);
-        const hours = oneMinuteLater.getHours().toString().padStart(2, '0');
-        const minutes = oneMinuteLater.getMinutes().toString().padStart(2, '0');
-        const dtPlusOne = document.getElementById('datetime_plus_one');
-        if (dtPlusOne) dtPlusOne.value = `${hours}:${minutes}`;
     }
 
     function formatDateWithDay(dateString) {
         const d = new Date(dateString);
         if (isNaN(d)) return '-';
-        const days = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
-        const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
-        return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]}`;
+        const days = ['วันอาทิตย์', 'วันจันทร์', 'วันอังคาร', 'วันพุธ', 'วันพฤหัสบดี', 'วันศุกร์', 'วันเสาร์'];
+        const months = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+        return `${days[d.getDay()]}ที่ ${d.getDate()} ${months[d.getMonth()]}`;
     }
 
-    window.handlePaste = function(event) {
-        const items = event.clipboardData.items;
-        for (let i = 0; i < items.length; i++) {
-            if (items[i].type.indexOf('image') !== -1) {
-                const blob = items[i].getAsFile();
-                const reader = new FileReader();
-                reader.onload = e => {
-                    const img = new Image();
-                    img.onload = () => { qrCodeImage = img; window.updateDisplay(); };
-                    img.src = e.target.result;
-                };
-                reader.readAsDataURL(blob);
+    function formatDate(dateString) {
+        const d = new Date(dateString);
+        if (isNaN(d)) return '-';
+        const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+        const year = (d.getFullYear() + 543).toString().slice(-2);
+        return `${d.getDate()} ${months[d.getMonth()]} ${year}`;
+    }
+
+    function getTimeAgoMessage(baseTime, compareTime) {
+        if (!baseTime || !compareTime) return "ตอนนี้";
+        const baseDate = new Date(`1970-01-01T${baseTime}:00Z`);
+        const compDate = new Date(`1970-01-01T${compareTime}:00Z`);
+        const diffMins = Math.floor((baseDate - compDate) / 60000);
+
+        if (diffMins >= 60) return `${Math.floor(diffMins / 60)} ชั่วโมงที่แล้ว`;
+        if (diffMins > 1) return `${diffMins} นาทีที่แล้ว`;
+        if (diffMins === 1) return "1 นาทีที่แล้ว";
+        return "ตอนนี้";
+    }
+
+    function drawCanvasContent(ctx, canvas, data) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        const activeBgMode = document.getElementById('activeBgMode')?.value || 'system';
+        const customBgUrl = document.getElementById('customImageDataUrl')?.value || '';
+
+        // ฟังก์ชันวาดเฉพาะข้อความและแบตเตอรี่ (ไม่ต้องมีกรอบ 666, 667)
+        const drawUI = () => {
+            drawText(ctx, `   ${data.formattedDateWithDay}   `, 308, 167.8, 33.50, 'SFThonburiSemiBold', '#ffffff', 'center', 24, 3, 0, 0, 800, 0);
+            drawText(ctx, `${data.formattedTimePlusOne}`, 295, 298.8, 138.50, 'SFThonburiSemiBold', '#ffffff', 'center', 1.5, 3, 0, 0, 800, -7);
+
+            drawText(ctx, `รายการเงินเข้า`, 107.8, 451.8, 21.50, 'SFThonburiBold', '#000000', 'left', 1.5, 3, 0, 0, 800, 0);
+            drawText(ctx, `${data.timeMsg1}`, 547.5, 451.8, 18.50, 'SFThonburiRegular', '#6f8590', 'right', 1.5, 3, 0, 0, 800, 0);
+            drawText(ctx, `บัญชี ${data.senderaccount1} จำนวนเงิน ${data.money01} บาท วันที่ ${data.formattedDate} ${data.formattedTime} น.<br>`, 107.8, 481.8, 20.50, 'SFThonburiRegular', '#000000', 'left', 31.5, 3, 0, 0, 420, 0);
+
+            drawText(ctx, `รายการเงินเข้า`, 107.8, 588, 21.50, 'SFThonburiBold', '#000000', 'left', 1.5, 3, 0, 0, 800, 0);
+            drawText(ctx, `${data.timeMsg2}`, 547.5, 588, 18.50, 'SFThonburiRegular', '#6f8590', 'right', 1.5, 3, 0, 0, 800, 0);
+            drawText(ctx, `บัญชี ${data.senderaccount1} จำนวนเงิน ${data.money02} บาท วันที่ ${data.formattedDate} ${data.formattedTime1} น.<br>`, 107.8, 617.8, 20.50, 'SFThonburiRegular', '#000000', 'left', 31.5, 3, 0, 0, 420, 0);
+
+            drawBattery(ctx, data.batteryLevel, powerSavingMode);
+        };
+
+        // ฟังก์ชันวาดกรอบ 666, 667 แล้วค่อยเรียก drawUI (ใช้เฉพาะโหมดวางรูปเอง)
+        const drawOverlaysAndUI = () => {
+            let loadedCount = 0;
+            const img1 = new Image();
+            const img2 = new Image();
+            let img1Success = false, img2Success = false;
+
+            const checkAndDrawText = () => {
+                loadedCount++;
+                if (loadedCount === 2) {
+                    if (img1Success) {
+                        ctx.globalAlpha = 0.80; 
+                        ctx.drawImage(img1, 0, 0, canvas.width, canvas.height);
+                        ctx.globalAlpha = 1.0; 
+                    }
+                    if (img2Success) {
+                        ctx.drawImage(img2, 0, 0, canvas.width, canvas.height);
+                    }
+                    
+                    // หลังจากวาดกรอบเสร็จ ค่อยวาดข้อความทับลงไป
+                    drawUI();
+                }
+            };
+
+            img1.onload = () => { img1Success = true; checkAndDrawText(); };
+            img1.onerror = () => { checkAndDrawText(); };
+            img1.src = 'assets/image/bs/backgroundEnter-KB4.666.png';
+
+            img2.onload = () => { img2Success = true; checkAndDrawText(); };
+            img2.onerror = () => { checkAndDrawText(); };
+            img2.src = 'assets/image/bs/backgroundEnter-KB4.667.png';
+        };
+
+        // --- เช็คเงื่อนไขว่าใช้รูปพื้นหลังแบบไหน ---
+        if (activeBgMode === 'custom' && customBgUrl) {
+            const userImg = new Image();
+            userImg.onload = function() {
+                const imgRatio = userImg.width / userImg.height;
+                const canvasRatio = canvas.width / canvas.height;
+                let renderW, renderH, offsetX = 0, offsetY = 0;
+                
+                if (imgRatio < canvasRatio) {
+                    renderW = canvas.width;
+                    renderH = canvas.width / imgRatio;
+                    offsetY = (canvas.height - renderH) / 2;
+                } else {
+                    renderH = canvas.height;
+                    renderW = canvas.height * imgRatio;
+                    offsetX = (canvas.width - renderW) / 2;
+                }
+                
+                ctx.drawImage(userImg, offsetX, offsetY, renderW, renderH);
+                
+                // ใช้รูปวางเอง -> เรียกใช้วาดกรอบ 666, 667 + ข้อความ
+                drawOverlaysAndUI(); 
+            };
+            userImg.onerror = function() {
+                ctx.fillStyle = "#1e293b";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                drawOverlaysAndUI();
+            };
+            userImg.src = customBgUrl;
+        } else {
+            if (cachedBgImage.src) {
+                ctx.drawImage(cachedBgImage, 0, 0, canvas.width, canvas.height);
+            } else {
+                ctx.fillStyle = "#1e293b";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
+            
+            // ใช้รูปจากระบบ (ไม่มีการวางรูปเอง) -> วาดแค่ข้อความอย่างเดียว ไม่เอากรอบ
+            drawUI(); 
         }
-    };
-    
-    document.addEventListener('paste', window.handlePaste);
+    }
 
     window.updateDisplay = function() {
         const canvas = document.getElementById('canvas');
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
 
+        const activeBgMode = document.getElementById('activeBgMode')?.value || 'system';
         const bgSelect = document.getElementById('backgroundSelect')?.value || '';
-        
-        if (bgSelect && bgSelect !== currentBgSrc) {
-            currentBgSrc = bgSelect;
-            getCachedImage(bgSelect);
-            return;
-        }
-
-        const bgImg = getCachedImage(bgSelect || 'assets/image/bs/backgroundEnter-KT6.1.jpg');
-        if (!bgImg || !bgImg.complete) return;
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
-
         const datetime = document.getElementById('datetime')?.value || '-';
+        const datetime1 = document.getElementById('datetime1')?.value || '-';
         const datetimePlusOne = document.getElementById('datetime_plus_one')?.value || '-';
-        const batteryLevel = document.getElementById('battery')?.value || '100';
-        const money01 = document.getElementById('money01')?.value || '-';
         
-        const formattedDateWithDay = formatDateWithDay(datetime.substring(0, 10));
-        const formattedTime = datetime.length > 11 ? datetime.substring(11, 16) : '-';
-        const formattedTimePlusOne = datetimePlusOne;
+        const data = {
+            batteryLevel: document.getElementById('battery')?.value || '100',
+            money01: document.getElementById('money01')?.value || '-',
+            money02: document.getElementById('money02')?.value || '-',
+            senderaccount1: document.getElementById('senderaccount1')?.value || '-',
+            formattedDate: formatDate(datetime.substring(0, 10)),
+            formattedDateWithDay: formatDateWithDay(datetime.substring(0, 10)),
+            formattedTime: datetime.length > 11 ? datetime.substring(11, 16) : '-',
+            formattedTime1: datetime1.length > 11 ? datetime1.substring(11, 16) : '-',
+            formattedTimePlusOne: datetimePlusOne
+        };
 
-        let timeDifference = Math.floor((new Date(`1970-01-01T${formattedTimePlusOne}:00Z`) - new Date(`1970-01-01T${formattedTime}:00Z`)) / 60000);
-        let timeMessage = "ตอนนี้";
-        if (timeDifference >= 60) timeMessage = `${Math.floor(timeDifference / 60)} ชั่วโมงที่แล้ว`;
-        else if (timeDifference > 1) timeMessage = `${timeDifference} นาทีที่แล้ว`;
-        else if (timeDifference === 1) timeMessage = "1 นาทีที่แล้ว";
-        
-        const senderaccount1 = document.getElementById('senderaccount1')?.value || '-';
-        const bank1 = document.getElementById('bank1')?.value || '-';
-        const receiveraccount = document.getElementById('receiveraccount')?.value || '-';
+        data.timeMsg1 = getTimeAgoMessage(data.formattedTimePlusOne, data.formattedTime);
+        data.timeMsg2 = getTimeAgoMessage(data.formattedTimePlusOne, data.formattedTime1);
 
-        drawText(ctx, `${batteryLevel}%`, 521.8, 61.5, 18, 'SarabunRegular', '#414141', 'right', 1.5, 3, 0, 0, 800, 0);
-
-        ctx.font = '18px SarabunRegular';
-        const textWidth = ctx.measureText(`${batteryLevel}%`).width;
-        const iconX = 531.8 - textWidth - 10 - 110;
-        
-        const batIcon = getCachedImage('assets/image/icon/icona.png');
-        if (batIcon && batIcon.complete && batIcon.naturalHeight !== 0) {
-            ctx.drawImage(batIcon, iconX, 34.5, 110, 42);
+        if (activeBgMode === 'system' && bgSelect && bgSelect !== currentBgSrc) {
+            cachedBgImage.onload = () => {
+                currentBgSrc = bgSelect;
+                drawCanvasContent(ctx, canvas, data);
+            };
+            cachedBgImage.onerror = () => {
+                drawCanvasContent(ctx, canvas, data);
+            };
+            cachedBgImage.src = bgSelect;
+        } else {
+            drawCanvasContent(ctx, canvas, data);
         }
-
-        drawText(ctx, `   ${formattedDateWithDay}   `, 36.8, 119, 27.5, 'SarabunRegular', '#2c2c2c', 'left', 24, 3, 0, 0, 800, 0);
-        drawText(ctx, `${formattedTimePlusOne}`, 62, 60, 20, 'SarabunMedium', '#2c2c2c', 'center', 1.5, 3, 0, 0, 800, 0);
-        
-        drawText(ctx, `รับเงินสำเร็จ`, 45.8, 435, 23, 'SarabunMedium', '#282828', 'left', 1.5, 3, 0, 0, 800, 0.25);
-        drawText(ctx, `${formattedTime}`, 128, 390.3, 18.50, 'SFThonburiRegular', '#585858', 'left', 1.5, 3, 0, 0, 800, 0);
-
-        drawText(ctx, `ได้รับ +${money01} บาท เข้าบัญชี ${senderaccount1} จากบัญชี ${bank1} ${receiveraccount}`, 45.8, 463.9, 20.50, 'SarabunRegular', '#525252', 'left', 30, 3, 0, 0, 430, 0.25);
-
-        if (qrCodeImage) {
-            ctx.drawImage(qrCodeImage, 0, 130.3, 555, 951);
-        }
-
-        drawBattery(ctx, batteryLevel, powerSavingMode);
     };
 
     function drawText(ctx, text, x, y, fontSize, fontFamily, color, align, lineHeight, maxLines, shadowColor, shadowBlur, maxWidth, letterSpacing) {
-        ctx.font = `${fontSize}px "${fontFamily}", sans-serif`;
+        ctx.font = `${fontSize}px ${fontFamily}`;
         ctx.fillStyle = color;
         ctx.textAlign = 'left';
         ctx.shadowColor = shadowColor || 'transparent';
         ctx.shadowBlur = shadowBlur || 0;
 
-        const safeText = String(text || '');
-        const paragraphs = safeText.split('<br>');
+        const paragraphs = text.split('<br>');
         let currentY = y;
 
         paragraphs.forEach(paragraph => {
             const segmenter = new Intl.Segmenter('th', { granularity: 'word' });
-            const words = [...segmenter.segment(paragraph)].map(s => s.segment);
-            let lines = [], currentLine = '';
+            const words = [...segmenter.segment(paragraph)].map(segment => segment.segment);
+            let lines = [];
+            let currentLine = '';
 
-            words.forEach(word => {
+            words.forEach((word) => {
                 const testLine = currentLine + word;
                 const testWidth = ctx.measureText(testLine).width + (testLine.length - 1) * letterSpacing;
+
                 if (testWidth > maxWidth && currentLine !== '') {
                     lines.push(currentLine);
                     currentLine = word;
@@ -186,18 +212,20 @@
                     currentLine = testLine;
                 }
             });
-            if (currentLine) lines.push(currentLine.trimStart());
+            if (currentLine) lines.push(currentLine.trimStart()); 
 
             lines.forEach((line, index) => {
                 let currentX = x;
-                if (align === 'center') currentX = x - (ctx.measureText(line).width / 2) - ((line.length - 1) * letterSpacing) / 2;
-                else if (align === 'right') currentX = x - ctx.measureText(line).width - ((line.length - 1) * letterSpacing);
-                
+                if (align === 'center') {
+                    currentX = x - (ctx.measureText(line).width / 2) - ((line.length - 1) * letterSpacing) / 2;
+                } else if (align === 'right') {
+                    currentX = x - ctx.measureText(line).width - ((line.length - 1) * letterSpacing);
+                }
+
                 drawTextLine(ctx, line, currentX, currentY, letterSpacing);
                 currentY += lineHeight;
                 if (maxLines && index >= maxLines - 1) return;
             });
-            currentY += lineHeight;
         });
     }
 
@@ -206,29 +234,39 @@
             ctx.fillText(text, x, y);
             return;
         }
-
-        const characters = [...(new Intl.Segmenter('th', { granularity: 'grapheme' })).segment(String(text))].map(s => s.segment);
-        let currentX = x;
+        
+        const segmenter = new Intl.Segmenter('th', { granularity: 'grapheme' });
+        const characters = [...segmenter.segment(text)].map(seg => seg.segment);
+        let currentPosition = x;
 
         characters.forEach((char, index) => {
-            const code = char.charCodeAt(0);
-            const prevChar = index > 0 ? characters[index - 1].charCodeAt(0) : null;
+            const charCode = char.charCodeAt(0);
+            const prevChar = index > 0 ? characters[index - 1] : null;
 
-            let yOff = 0, xOff = 0;
-            if (code >= 0x0E34 && code <= 0x0E37) yOff = -1;
-            if (code >= 0x0E48 && code <= 0x0E4C) {
-                if (prevChar && ((prevChar >= 0x0E34 && prevChar <= 0x0E37) || prevChar === 0x0E31)) yOff = -8;
-                else xOff = -7;
+            const isUpperVowel = (charCode >= 0x0E34 && charCode <= 0x0E37);
+            const isToneMark = (charCode >= 0x0E48 && charCode <= 0x0E4C);
+            const isBeforeVowel = (charCode === 0x0E31); 
+            const isBelowVowel = (charCode >= 0x0E38 && charCode <= 0x0E3A);
+
+            let yOffset = 0, xOffset = 0;
+
+            if (isUpperVowel) { yOffset = -1; xOffset = 0; }
+            if (isToneMark) {
+                if (prevChar && ((prevChar.charCodeAt(0) >= 0x0E34 && prevChar.charCodeAt(0) <= 0x0E37) || prevChar.charCodeAt(0) === 0x0E31)) {
+                    yOffset = -8; xOffset = 0;
+                } else {
+                    yOffset = 0; xOffset = -7;
+                }
             }
-            if (code === 0x0E31) { yOff = -1; xOff = 1; }
-            if (code >= 0x0E38 && code <= 0x0E3A) { xOff = -10; }
+            if (isBeforeVowel) { yOffset = -1; xOffset = 1; }
+            if (isBelowVowel) { yOffset = 0; xOffset = -10; }
 
-            ctx.fillText(char, currentX + xOff, y + yOff);
+            ctx.fillText(char, currentPosition + xOffset, y + yOffset);
 
-            if (![0x0E48,0x0E49,0x0E4A,0x0E4B,0x0E4C,0x0E31,0x0E34,0x0E35,0x0E36,0x0E37,0x0E38,0x0E39,0x0E3A].includes(code)) {
-                currentX += ctx.measureText(char).width + letterSpacing;
+            if (!isToneMark && !isBeforeVowel && !isBelowVowel) {
+                currentPosition += ctx.measureText(char).width + letterSpacing;
             } else {
-                currentX += ctx.measureText(char).width;
+                currentPosition += ctx.measureText(char).width;
             }
         });
     }
@@ -238,50 +276,80 @@
         ctx.strokeStyle = '#9b9b9b'; 
         ctx.fillStyle = '#ffffff'; 
 
-        let batteryColor = '#414141'; 
-        if (batteryLevel <= 20) batteryColor = '#ff0000'; 
-        else if (powerSavingMode) batteryColor = '#fccd0e'; 
+        let batteryColor = '#ffffff'; 
+        if (batteryLevel <= 20) {
+            batteryColor = '#ff0000'; 
+        } else if (powerSavingMode) {
+            batteryColor = '#fccd0e'; 
+        }
 
-        const x = 525.2, y = 48.1, width = 11.7, height = 13.9, radius = 1; 
-        const fillHeight = (batteryLevel / 100) * height; 
-        const fillY = y + height - fillHeight; 
+        const fillWidth = (batteryLevel / 100) * 31; 
+        const x = 511.5, y = 32.4, height = 13.8, radius = 4; 
 
-        ctx.fillStyle = batteryColor;
-        ctx.beginPath();
-        ctx.moveTo(x + radius, fillY); 
-        ctx.lineTo(x + width - radius, fillY); 
-        ctx.arcTo(x + width, fillY, x + width, fillY + radius, radius); 
-        ctx.lineTo(x + width, y + height - radius); 
-        ctx.arcTo(x + width, y + height, x + width - radius, y + height, radius);
-        ctx.lineTo(x + radius, y + height); 
-        ctx.arcTo(x, y + height, x, y + height - radius, radius); 
-        ctx.lineTo(x, fillY + radius); 
-        ctx.arcTo(x, fillY, x + radius, fillY, radius); 
-        ctx.closePath();
-        ctx.fill();
+        ctx.fillStyle = batteryColor; 
+        ctx.beginPath(); 
+        ctx.moveTo(x, y + radius); 
+        ctx.lineTo(x, y + height - radius); 
+        ctx.arcTo(x, y + height, x + radius, y + height, radius); 
+        ctx.lineTo(x + fillWidth - radius, y + height); 
+        ctx.arcTo(x + fillWidth, y + height, x + fillWidth, y + height - radius, radius); 
+        ctx.lineTo(x + fillWidth, y + radius); 
+        ctx.arcTo(x + fillWidth, y, x + fillWidth - radius, y, radius); 
+        ctx.lineTo(x + radius, y); 
+        ctx.arcTo(x, y, x, y + radius, radius); 
+        ctx.closePath(); 
+        ctx.fill(); 
     }
-
-    window.togglePowerSavingMode = function() {
-        powerSavingMode = !powerSavingMode;
-        document.getElementById('powerSavingMode')?.classList.toggle('active', powerSavingMode);
-        window.updateDisplay();
-    };
-
-    window.updateBatteryUI = function() {
-        const val = document.getElementById('battery')?.value || '100';
-        const bl = document.getElementById('battery-level');
-        if (bl) bl.innerText = val;
-    };
 
     window.downloadImage = function() {
         const canvas = document.getElementById('canvas');
         if(!canvas) return;
         const link = document.createElement('a');
         link.href = canvas.toDataURL('image/png');
-        link.download = 'notify_ktb5.png';
+        link.download = 'notify_kbank4.png'; 
         link.click();
     };
 
-    document.getElementById('generate')?.addEventListener('click', window.updateDisplay);
+    window.addEventListener('paste', function(e) {
+        if(document.activeElement.tagName === 'INPUT') return; 
+
+        const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+        for (let index in items) {
+            const item = items[index];
+            if (item.kind === 'file' && item.type.startsWith('image/')) {
+                const blob = item.getAsFile();
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('customImageDataUrl').value = event.target.result;
+                    if(window.activateCustomMode) window.activateCustomMode();
+
+                    const dropZone = document.getElementById('pasteDropZone');
+                    if (dropZone) {
+                        const originalBg = dropZone.style.background;
+                        const originalBorder = dropZone.style.borderColor;
+                        dropZone.style.background = 'rgba(0, 169, 80, 0.2)';
+                        dropZone.style.borderColor = '#00a950';
+                        setTimeout(() => {
+                            dropZone.style.background = originalBg;
+                            dropZone.style.borderColor = originalBorder;
+                        }, 400);
+                    }
+                };
+                reader.readAsDataURL(blob);
+                e.preventDefault();
+                break;
+            }
+        }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+        loadFonts().then(() => {
+            document.fonts.ready.then(() => {
+                if (typeof window.updateDisplay === 'function') window.updateDisplay();
+            });
+        }).catch(() => {
+            if (typeof window.updateDisplay === 'function') window.updateDisplay();
+        });
+    });
 
 })();

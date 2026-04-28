@@ -9,7 +9,6 @@ window.currentUserUid = null;
 // ==========================================
 onAuthStateChanged(auth, (user) => {
     if (!user) {
-
         window.location.replace('login.html');
     } else {
         window.currentUserUid = user.uid; 
@@ -99,7 +98,11 @@ window.saveFavoriteToCloud = async function() {
         may: document.getElementById('monthandyear')?.value || '',
         name1: document.getElementById('name1')?.value || '',
         nametext1: document.getElementById('nametext1')?.value || '',
-        text1: document.getElementById('text1')?.value || ''
+        text1: document.getElementById('text1')?.value || '',
+
+        // 🟢 ส่วนที่เพิ่มใหม่สำหรับระบบอัปโหลดรูปพื้นหลังเอง 🟢
+        activeBgMode: document.getElementById('activeBgMode')?.value || 'system',
+        customImageDataUrl: document.getElementById('customImageDataUrl')?.value || ''
     };
 
     try {
@@ -112,7 +115,7 @@ window.saveFavoriteToCloud = async function() {
         alert("✅ บันทึกรายการโปรดเรียบร้อยแล้ว!");
     } catch (error) {
         console.error("Error saving to cloud:", error);
-        alert("❌ เกิดข้อผิดพลาดในการบันทึกข้อมูล โปรดลองใหม่อีกครั้ง");
+        alert("❌ เกิดข้อผิดพลาดในการบันทึกข้อมูล โปรดลองใหม่อีกครั้ง (รูปภาพอาจมีขนาดใหญ่เกินไป)");
     }
 };
 
@@ -159,6 +162,21 @@ window.loadFavoriteFromCloud = async function() {
             if(favData.nametext1 !== undefined && document.getElementById('nametext1')) document.getElementById('nametext1').value = favData.nametext1;
             if(favData.text1 !== undefined && document.getElementById('text1')) document.getElementById('text1').value = favData.text1;
             
+            // 🟢 ส่วนที่เพิ่มใหม่สำหรับโหลดรูประบบอัปโหลดพื้นหลัง 🟢
+            if(favData.customImageDataUrl !== undefined && document.getElementById('customImageDataUrl')) {
+                document.getElementById('customImageDataUrl').value = favData.customImageDataUrl;
+            }
+            if(favData.activeBgMode !== undefined && document.getElementById('activeBgMode')) {
+                document.getElementById('activeBgMode').value = favData.activeBgMode;
+            }
+
+            // เช็คสถานะโหมดรูปภาพ แล้วเรียกฟังก์ชันเปลี่ยนหน้าตา UI กล่องอัปโหลด
+            if(favData.activeBgMode === 'custom' && favData.customImageDataUrl) {
+                if(typeof window.activateCustomMode === 'function') window.activateCustomMode();
+            } else {
+                if(typeof window.activateSystemMode === 'function') window.activateSystemMode();
+            }
+
             // อัปเดต Canvas ทันทีหลังจากโหลดข้อมูลเสร็จ
             if(typeof window.triggerUpdate === 'function') window.triggerUpdate();
             if(typeof window.updateDisplay === 'function') window.updateDisplay();
