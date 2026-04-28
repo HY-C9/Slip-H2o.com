@@ -1,5 +1,4 @@
 (function() {
-    let qrCodeImage = null;
     let powerSavingMode = false;
     let cachedBgImage = new Image();
     let currentBgSrc = '';
@@ -52,26 +51,98 @@
     function drawCanvasContent(ctx, canvas, data) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        if (cachedBgImage.src) {
-            ctx.drawImage(cachedBgImage, 0, 0, canvas.width, canvas.height);
+        const activeBgMode = document.getElementById('activeBgMode')?.value || 'system';
+        const customBgUrl = document.getElementById('customImageDataUrl')?.value || '';
+
+        // ฟังก์ชันวาดเฉพาะข้อความและแบตเตอรี่ (ไม่ต้องมีกรอบ 666, 667)
+        const drawUI = () => {
+            drawText(ctx, `   ${data.formattedDateWithDay}   `, 308, 167.8, 33.50, 'SFThonburiSemiBold', '#ffffff', 'center', 24, 3, 0, 0, 800, 0);
+            drawText(ctx, `${data.formattedTimePlusOne}`, 295, 298.8, 138.50, 'SFThonburiSemiBold', '#ffffff', 'center', 1.5, 3, 0, 0, 800, -7);
+
+            drawText(ctx, `รายการเงินเข้า`, 107.8, 451.8, 21.50, 'SFThonburiBold', '#000000', 'left', 1.5, 3, 0, 0, 800, 0);
+            drawText(ctx, `${data.timeMsg1}`, 547.5, 451.8, 18.50, 'SFThonburiRegular', '#6f8590', 'right', 1.5, 3, 0, 0, 800, 0);
+            drawText(ctx, `บัญชี ${data.senderaccount1} จำนวนเงิน ${data.money01} บาท วันที่ ${data.formattedDate} ${data.formattedTime} น.<br>`, 107.8, 481.8, 20.50, 'SFThonburiRegular', '#000000', 'left', 31.5, 3, 0, 0, 420, 0);
+
+            drawText(ctx, `รายการเงินเข้า`, 107.8, 588, 21.50, 'SFThonburiBold', '#000000', 'left', 1.5, 3, 0, 0, 800, 0);
+            drawText(ctx, `${data.timeMsg2}`, 547.5, 588, 18.50, 'SFThonburiRegular', '#6f8590', 'right', 1.5, 3, 0, 0, 800, 0);
+            drawText(ctx, `บัญชี ${data.senderaccount1} จำนวนเงิน ${data.money02} บาท วันที่ ${data.formattedDate} ${data.formattedTime1} น.<br>`, 107.8, 617.8, 20.50, 'SFThonburiRegular', '#000000', 'left', 31.5, 3, 0, 0, 420, 0);
+
+            drawBattery(ctx, data.batteryLevel, powerSavingMode);
+        };
+
+        // ฟังก์ชันวาดกรอบ 666, 667 แล้วค่อยเรียก drawUI (ใช้เฉพาะโหมดวางรูปเอง)
+        const drawOverlaysAndUI = () => {
+            let loadedCount = 0;
+            const img1 = new Image();
+            const img2 = new Image();
+            let img1Success = false, img2Success = false;
+
+            const checkAndDrawText = () => {
+                loadedCount++;
+                if (loadedCount === 2) {
+                    if (img1Success) {
+                        ctx.globalAlpha = 0.80; 
+                        ctx.drawImage(img1, 0, 0, canvas.width, canvas.height);
+                        ctx.globalAlpha = 1.0; 
+                    }
+                    if (img2Success) {
+                        ctx.drawImage(img2, 0, 0, canvas.width, canvas.height);
+                    }
+                    
+                    // หลังจากวาดกรอบเสร็จ ค่อยวาดข้อความทับลงไป
+                    drawUI();
+                }
+            };
+
+            img1.onload = () => { img1Success = true; checkAndDrawText(); };
+            img1.onerror = () => { checkAndDrawText(); };
+            img1.src = 'assets/image/bs/backgroundEnter-KB4.666.png';
+
+            img2.onload = () => { img2Success = true; checkAndDrawText(); };
+            img2.onerror = () => { checkAndDrawText(); };
+            img2.src = 'assets/image/bs/backgroundEnter-KB4.667.png';
+        };
+
+        // --- เช็คเงื่อนไขว่าใช้รูปพื้นหลังแบบไหน ---
+        if (activeBgMode === 'custom' && customBgUrl) {
+            const userImg = new Image();
+            userImg.onload = function() {
+                const imgRatio = userImg.width / userImg.height;
+                const canvasRatio = canvas.width / canvas.height;
+                let renderW, renderH, offsetX = 0, offsetY = 0;
+                
+                if (imgRatio < canvasRatio) {
+                    renderW = canvas.width;
+                    renderH = canvas.width / imgRatio;
+                    offsetY = (canvas.height - renderH) / 2;
+                } else {
+                    renderH = canvas.height;
+                    renderW = canvas.height * imgRatio;
+                    offsetX = (canvas.width - renderW) / 2;
+                }
+                
+                ctx.drawImage(userImg, offsetX, offsetY, renderW, renderH);
+                
+                // ใช้รูปวางเอง -> เรียกใช้วาดกรอบ 666, 667 + ข้อความ
+                drawOverlaysAndUI(); 
+            };
+            userImg.onerror = function() {
+                ctx.fillStyle = "#1e293b";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                drawOverlaysAndUI();
+            };
+            userImg.src = customBgUrl;
+        } else {
+            if (cachedBgImage.src) {
+                ctx.drawImage(cachedBgImage, 0, 0, canvas.width, canvas.height);
+            } else {
+                ctx.fillStyle = "#1e293b";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+            
+            // ใช้รูปจากระบบ (ไม่มีการวางรูปเอง) -> วาดแค่ข้อความอย่างเดียว ไม่เอากรอบ
+            drawUI(); 
         }
-
-        drawText(ctx, `   ${data.formattedDateWithDay}   `, 308, 167.8, 33.50, 'SFThonburiSemiBold', '#ffffff', 'center', 24, 3, 0, 0, 800, 0);
-        drawText(ctx, `${data.formattedTimePlusOne}`, 295, 298.8, 138.50, 'SFThonburiSemiBold', '#ffffff', 'center', 1.5, 3, 0, 0, 800, -7);
-
-        drawText(ctx, `รายการเงินเข้า`, 107.8, 451.8, 21.50, 'SFThonburiBold', '#000000', 'left', 1.5, 3, 0, 0, 800, 0);
-        drawText(ctx, `${data.timeMsg1}`, 547.5, 451.8, 18.50, 'SFThonburiRegular', '#6f8590', 'right', 1.5, 3, 0, 0, 800, 0);
-        drawText(ctx, `บัญชี ${data.senderaccount1} จำนวนเงิน ${data.money01} บาท วันที่ ${data.formattedDate} ${data.formattedTime} น.<br>`, 107.8, 481.8, 20.50, 'SFThonburiRegular', '#000000', 'left', 31.5, 3, 0, 0, 420, 0);
-
-        drawText(ctx, `รายการเงินเข้า`, 107.8, 588, 21.50, 'SFThonburiBold', '#000000', 'left', 1.5, 3, 0, 0, 800, 0);
-        drawText(ctx, `${data.timeMsg2}`, 547.5, 588, 18.50, 'SFThonburiRegular', '#6f8590', 'right', 1.5, 3, 0, 0, 800, 0);
-        drawText(ctx, `บัญชี ${data.senderaccount1} จำนวนเงิน ${data.money02} บาท วันที่ ${data.formattedDate} ${data.formattedTime1} น.<br>`, 107.8, 617.8, 20.50, 'SFThonburiRegular', '#000000', 'left', 31.5, 3, 0, 0, 420, 0);
-
-        if (qrCodeImage) {
-            ctx.drawImage(qrCodeImage, 0, 130.3, 555, 951); 
-        }
-
-        drawBattery(ctx, data.batteryLevel, powerSavingMode);
     }
 
     window.updateDisplay = function() {
@@ -79,6 +150,7 @@
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
 
+        const activeBgMode = document.getElementById('activeBgMode')?.value || 'system';
         const bgSelect = document.getElementById('backgroundSelect')?.value || '';
         const datetime = document.getElementById('datetime')?.value || '-';
         const datetime1 = document.getElementById('datetime1')?.value || '-';
@@ -99,7 +171,7 @@
         data.timeMsg1 = getTimeAgoMessage(data.formattedTimePlusOne, data.formattedTime);
         data.timeMsg2 = getTimeAgoMessage(data.formattedTimePlusOne, data.formattedTime1);
 
-        if (bgSelect && bgSelect !== currentBgSrc) {
+        if (activeBgMode === 'system' && bgSelect && bgSelect !== currentBgSrc) {
             cachedBgImage.onload = () => {
                 currentBgSrc = bgSelect;
                 drawCanvasContent(ctx, canvas, data);
@@ -238,21 +310,34 @@
         link.click();
     };
 
-    window.addEventListener('paste', function(event) {
-        const items = event.clipboardData.items;
-        for (let i = 0; i < items.length; i++) {
-            if (items[i].type.indexOf('image') !== -1) {
-                const blob = items[i].getAsFile();
+    window.addEventListener('paste', function(e) {
+        if(document.activeElement.tagName === 'INPUT') return; 
+
+        const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+        for (let index in items) {
+            const item = items[index];
+            if (item.kind === 'file' && item.type.startsWith('image/')) {
+                const blob = item.getAsFile();
                 const reader = new FileReader();
                 reader.onload = function(event) {
-                    const img = new Image();
-                    img.onload = function() {
-                        qrCodeImage = img;
-                        if(window.updateDisplay) window.updateDisplay();
-                    };
-                    img.src = event.target.result;
+                    document.getElementById('customImageDataUrl').value = event.target.result;
+                    if(window.activateCustomMode) window.activateCustomMode();
+
+                    const dropZone = document.getElementById('pasteDropZone');
+                    if (dropZone) {
+                        const originalBg = dropZone.style.background;
+                        const originalBorder = dropZone.style.borderColor;
+                        dropZone.style.background = 'rgba(0, 169, 80, 0.2)';
+                        dropZone.style.borderColor = '#00a950';
+                        setTimeout(() => {
+                            dropZone.style.background = originalBg;
+                            dropZone.style.borderColor = originalBorder;
+                        }, 400);
+                    }
                 };
                 reader.readAsDataURL(blob);
+                e.preventDefault();
+                break;
             }
         }
     });
