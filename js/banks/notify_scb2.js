@@ -1,21 +1,6 @@
- (function() {
-    let qrCodeImage = null;
-    let powerSavingMode = false;
+(function() {
+    let cachedBgImage = new Image();
     let currentBgSrc = '';
-    const imageCache = {};
-
-    function getCachedImage(src) {
-        if (!src) return null;
-        if (!imageCache[src]) {
-            const img = new Image();
-            img.onload = () => {
-                if (typeof window.updateDisplay === 'function') window.updateDisplay();
-            };
-            img.src = src;
-            imageCache[src] = img;
-        }
-        return imageCache[src];
-    }
 
     function loadFonts() {
         const fonts = [
@@ -30,31 +15,6 @@
                 if (result.status === 'fulfilled') document.fonts.add(result.value);
             });
         });
-    }
-
-    window.onload = function() {
-        setCurrentDateTime();
-        loadFonts().then(() => {
-            document.fonts.ready.then(() => {
-                if (typeof window.updateDisplay === 'function') window.updateDisplay();
-            });
-        }).catch(() => {
-            if (typeof window.updateDisplay === 'function') window.updateDisplay();
-        });
-    };
-
-    function setCurrentDateTime() {
-        const now = new Date();
-        const localDateTime = now.toLocaleString('sv-SE', { timeZone: 'Asia/Bangkok', hour12: false });
-        
-        const dt = document.getElementById('datetime');
-        if (dt) dt.value = localDateTime.substring(0, 16);
-
-        const oneMinuteLater = new Date(now.getTime() + 60000);
-        const hours = oneMinuteLater.getHours().toString().padStart(2, '0');
-        const minutes = oneMinuteLater.getMinutes().toString().padStart(2, '0');
-        const dtPlusOne = document.getElementById('datetime_plus_one');
-        if (dtPlusOne) dtPlusOne.value = `${hours}:${minutes}`;
     }
 
     function padZero(number) {
@@ -78,45 +38,21 @@
         return `${day}/${month}/${year}`;
     }
 
-    window.handlePaste = function(event) {
-        const items = event.clipboardData.items;
-        for (let i = 0; i < items.length; i++) {
-            if (items[i].type.indexOf('image') !== -1) {
-                const blob = items[i].getAsFile();
-                const reader = new FileReader();
-                reader.onload = e => {
-                    const img = new Image();
-                    img.onload = () => { qrCodeImage = img; window.updateDisplay(); };
-                    img.src = e.target.result;
-                };
-                reader.readAsDataURL(blob);
-            }
-        }
-    };
-    document.addEventListener('paste', window.handlePaste);
-
     window.updateDisplay = function() {
         const canvas = document.getElementById('canvas');
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
 
+        const activeBgMode = document.getElementById('activeBgMode')?.value || 'system';
+        const customBgUrl = document.getElementById('customImageDataUrl')?.value || '';
         const bgSelect = document.getElementById('backgroundSelect')?.value || 'assets/image/bs/backgroundEnter-SCB2.1.jpg';
-        
-        if (bgSelect && bgSelect !== currentBgSrc) {
-            currentBgSrc = bgSelect;
-            getCachedImage(bgSelect);
-            return;
-        }
-
-        const bgImg = getCachedImage(bgSelect);
-        if (!bgImg || !bgImg.complete) return;
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
 
         const datetime = document.getElementById('datetime')?.value || '-';
         const datetimePlusOne = document.getElementById('datetime_plus_one')?.value || '-';
         const batteryLevel = document.getElementById('battery')?.value || '100';
+        
+        // ดึงสถานะโหมดประหยัดพลังงานจากปุ่มใน HTML
+        const isPowerSaving = document.getElementById('powerSavingMode')?.classList.contains('btn-warning') || false;
 
         const money01 = document.getElementById('money01')?.value || '-';
         const name1 = document.getElementById('name1')?.value || '-';
@@ -136,20 +72,107 @@
         else if (timeDifference > 1) timeMessage = `${timeDifference} นาทีที่แล้ว`;
         else if (timeDifference === 1) timeMessage = "1 นาทีที่แล้ว";
 
-        drawText(ctx, `   ${formattedDateWithDay}   `, 308, 167.8, 33.50, 'SFThonburiSemiBold', '#ffffff', 'center', 24, 3, 0, 0, 800, 0);
-        drawText(ctx, `${formattedTimePlusOne}`, 295, 298.8, 138.50, 'SFThonburiSemiBold', '#ffffff', 'center', 1.5, 3, 0, 0, 800, -7);
+        // ฟังก์ชันวาดเฉพาะข้อความและแบตเตอรี่ (ไม่วาดกรอบ)
+        const drawUI = () => {
+            drawText(ctx, `   ${formattedDateWithDay}   `, 308, 167.8, 33.50, 'SFThonburiSemiBold', '#ffffff', 'center', 24, 3, 0, 0, 800, 0);
+            drawText(ctx, `${formattedTimePlusOne}`, 295, 298.8, 138.50, 'SFThonburiSemiBold', '#ffffff', 'center', 1.5, 3, 0, 0, 800, -7);
 
-        drawText(ctx, `SCB Connect`, 107.8, 942, 21.50, 'SFThonburiBold', '#000000', 'left', 1.5, 3, 0, 0, 800, 0);
-        drawText(ctx, `${timeMessage}`, 547.5, 942, 18.50, 'SFThonburiRegular', '#6f8590', 'right', 1.5, 3, 0, 0, 800, 0);
+            drawText(ctx, `SCB Connect`, 107.8, 942, 21.50, 'SFThonburiBold', '#000000', 'left', 1.5, 3, 0, 0, 800, 0);
+            drawText(ctx, `${timeMessage}`, 547.5, 942, 18.50, 'SFThonburiRegular', '#6f8590', 'right', 1.5, 3, 0, 0, 800, 0);
 
-        const detailMsg = `เงินเข้า: มีเงินโอน ${money01} บาท จาก ${name1} บัญชี ${receiveraccount} ธนาคาร ${bank1} เข้าบัญชีออมทรัพย์ ${senderaccount1} วันที่ ${formattedDate} @${formattedTime} ผ่าน ENET ยอดเงินที่ใช้ได้ ${money10} บาท`;
-        drawText(ctx, detailMsg, 107.8, 972, 20.50, 'SFThonburiRegular', '#000000', 'left', 31.5, 3, 0, 0, 425, -0.25);
+            const detailMsg = `เงินเข้า: มีเงินโอน ${money01} บาท จาก ${name1} บัญชี ${receiveraccount} ธนาคาร ${bank1} เข้าบัญชีออมทรัพย์ ${senderaccount1} วันที่ ${formattedDate} @${formattedTime} ผ่าน ENET ยอดเงินที่ใช้ได้ ${money10} บาท`;
+            drawText(ctx, detailMsg, 107.8, 972, 20.50, 'SFThonburiRegular', '#000000', 'left', 31.5, 3, 0, 0, 425, -0.25);
 
-        if (qrCodeImage) {
-            ctx.drawImage(qrCodeImage, 0, 130.3, 555, 951); 
+            drawBattery(ctx, batteryLevel, isPowerSaving);
+        };
+
+        // ฟังก์ชันโหลดกรอบ SCB2 666 และ 667 มาทับบนรูปที่อัปโหลดเอง
+        const drawOverlaysAndUI = () => {
+            let loadedCount = 0;
+            const img1 = new Image();
+            const img2 = new Image();
+            let img1Success = false, img2Success = false;
+
+            const checkAndDrawText = () => {
+                loadedCount++;
+                if (loadedCount === 2) {
+                    if (img1Success) {
+                        ctx.globalAlpha = 0.90; // สามารถปรับความใสของกรอบได้ตรงนี้ (0.0 - 1.0)
+                        ctx.drawImage(img1, 0, 0, canvas.width, canvas.height);
+                        ctx.globalAlpha = 1.0; 
+                    }
+                    if (img2Success) {
+                        ctx.drawImage(img2, 0, 0, canvas.width, canvas.height);
+                    }
+                    
+                    drawUI();
+                }
+            };
+
+            img1.onload = () => { img1Success = true; checkAndDrawText(); };
+            img1.onerror = () => { checkAndDrawText(); };
+            img1.src = 'assets/image/bs/backgroundEnter-SCB2.666.png'; 
+
+            img2.onload = () => { img2Success = true; checkAndDrawText(); };
+            img2.onerror = () => { checkAndDrawText(); };
+            img2.src = 'assets/image/bs/backgroundEnter-SCB2.667.png'; 
+        };
+
+        // ตรวจสอบว่าผู้ใช้ใช้โหมด "อัปโหลดรูปเอง" หรือไม่
+        if (activeBgMode === 'custom' && customBgUrl) {
+            const userImg = new Image();
+            userImg.onload = function() {
+                const imgRatio = userImg.width / userImg.height;
+                const canvasRatio = canvas.width / canvas.height;
+                let renderW, renderH, offsetX = 0, offsetY = 0;
+                
+                if (imgRatio < canvasRatio) {
+                    renderW = canvas.width;
+                    renderH = canvas.width / imgRatio;
+                    offsetY = (canvas.height - renderH) / 2;
+                } else {
+                    renderH = canvas.height;
+                    renderW = canvas.height * imgRatio;
+                    offsetX = (canvas.width - renderW) / 2;
+                }
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(userImg, offsetX, offsetY, renderW, renderH);
+                
+                // ถ้ารูปอัปโหลดเอง ให้วาดกรอบ 666/667 ทับ
+                drawOverlaysAndUI(); 
+            };
+            userImg.onerror = function() {
+                ctx.fillStyle = "#f3e8ff"; // สีพื้นหลังเผื่อโหลดรูปไม่ติด
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                drawOverlaysAndUI();
+            };
+            userImg.src = customBgUrl;
+
+        } else {
+            // โหมด "ใช้พื้นหลังระบบ"
+            if (bgSelect && bgSelect !== currentBgSrc) {
+                cachedBgImage.onload = () => {
+                    currentBgSrc = bgSelect;
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(cachedBgImage, 0, 0, canvas.width, canvas.height);
+                    drawUI(); // ถ้าระบบ จะไม่วาดกรอบ 666/667 ซ้ำซ้อน
+                };
+                cachedBgImage.onerror = () => {
+                    drawUI();
+                };
+                cachedBgImage.src = bgSelect;
+            } else {
+                if (cachedBgImage.complete && cachedBgImage.src) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(cachedBgImage, 0, 0, canvas.width, canvas.height);
+                } else {
+                    ctx.fillStyle = "#f3e8ff";
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                }
+                drawUI(); 
+            }
         }
-
-        drawBattery(ctx, batteryLevel, powerSavingMode);
     };
 
     function drawText(ctx, text, x, y, fontSize, fontFamily, color, align, lineHeight, maxLines, shadowColor, shadowBlur, maxWidth, letterSpacing) {
@@ -252,27 +275,14 @@
         ctx.fill(); 
     }
 
-    window.togglePowerSavingMode = function() {
-        powerSavingMode = !powerSavingMode;
-        document.getElementById('powerSavingMode')?.classList.toggle('active', powerSavingMode);
-        window.updateDisplay();
-    };
-
-    window.updateBatteryUI = function() {
-        const val = document.getElementById('battery')?.value || '100';
-        const bl = document.getElementById('battery-level');
-        if (bl) bl.innerText = val;
-    };
-
-    window.downloadImage = function() {
-        const canvas = document.getElementById('canvas');
-        if(!canvas) return;
-        const link = document.createElement('a');
-        link.href = canvas.toDataURL('image/png');
-        link.download = 'notify_scb2.png';
-        link.click();
-    };
-
-    document.getElementById('generate')?.addEventListener('click', window.updateDisplay);
+    window.addEventListener('DOMContentLoaded', () => {
+        loadFonts().then(() => {
+            document.fonts.ready.then(() => {
+                if (typeof window.updateDisplay === 'function') window.updateDisplay();
+            });
+        }).catch(() => {
+            if (typeof window.updateDisplay === 'function') window.updateDisplay();
+        });
+    });
 
 })();
