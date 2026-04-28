@@ -86,7 +86,6 @@
             drawBattery(ctx, batteryLevel, isPowerSaving);
         };
 
-        // ฟังก์ชันโหลดกรอบ SCB2 666 และ 667 มาทับบนรูปที่อัปโหลดเอง
         const drawOverlaysAndUI = () => {
             let loadedCount = 0;
             const img1 = new Image();
@@ -97,7 +96,7 @@
                 loadedCount++;
                 if (loadedCount === 2) {
                     if (img1Success) {
-                        ctx.globalAlpha = 0.90; // สามารถปรับความใสของกรอบได้ตรงนี้ (0.0 - 1.0)
+                        ctx.globalAlpha = 0.80; // สามารถปรับความใสของกรอบได้ตรงนี้ (0.0 - 1.0)
                         ctx.drawImage(img1, 0, 0, canvas.width, canvas.height);
                         ctx.globalAlpha = 1.0; 
                     }
@@ -118,7 +117,6 @@
             img2.src = 'assets/image/bs/backgroundEnter-SCB2.667.png'; 
         };
 
-        // ตรวจสอบว่าผู้ใช้ใช้โหมด "อัปโหลดรูปเอง" หรือไม่
         if (activeBgMode === 'custom' && customBgUrl) {
             const userImg = new Image();
             userImg.onload = function() {
@@ -139,11 +137,10 @@
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(userImg, offsetX, offsetY, renderW, renderH);
                 
-                // ถ้ารูปอัปโหลดเอง ให้วาดกรอบ 666/667 ทับ
                 drawOverlaysAndUI(); 
             };
             userImg.onerror = function() {
-                ctx.fillStyle = "#f3e8ff"; // สีพื้นหลังเผื่อโหลดรูปไม่ติด
+                ctx.fillStyle = "#f3e8ff"; 
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 drawOverlaysAndUI();
             };
@@ -156,7 +153,7 @@
                     currentBgSrc = bgSelect;
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                     ctx.drawImage(cachedBgImage, 0, 0, canvas.width, canvas.height);
-                    drawUI(); // ถ้าระบบ จะไม่วาดกรอบ 666/667 ซ้ำซ้อน
+                    drawUI(); 
                 };
                 cachedBgImage.onerror = () => {
                     drawUI();
