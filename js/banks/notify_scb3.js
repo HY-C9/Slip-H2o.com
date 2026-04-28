@@ -81,23 +81,16 @@
         return `${day}/${month}/${year}`;
     }
 
-    window.handlePaste = function(event) {
-        const items = event.clipboardData.items;
-        for (let i = 0; i < items.length; i++) {
-            if (items[i].type.indexOf('image') !== -1) {
-                const blob = items[i].getAsFile();
-                const reader = new FileReader();
-                reader.onload = e => {
-                    const img = new Image();
-                    img.onload = () => { qrCodeImage = img; window.updateDisplay(); };
-                    img.src = e.target.result;
-                };
-                reader.readAsDataURL(blob);
-            }
-        }
-    };
-    
-    document.addEventListener('paste', window.handlePaste);
+    window.onload = function() {
+    setCurrentDateTime();
+    loadFonts().then(function() {
+        document.fonts.ready.then(function() {
+            updateDisplay(); 
+        });
+    }).catch(function() {
+        updateDisplay();
+    });
+};
 
     window.updateDisplay = function() {
         const canvas = document.getElementById('canvas');
