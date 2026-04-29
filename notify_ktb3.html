@@ -107,6 +107,11 @@
         .btn-outline-warning { border-color: var(--warning-color); color: var(--warning-color); background: transparent; height: 36px; line-height: 1; padding: 0 15px; font-size: 0.85rem;}
         .btn-warning { background-color: var(--warning-color); color: #000; border-color: var(--warning-color); height: 36px; line-height: 1; padding: 0 15px; font-size: 0.85rem;}
 
+        /* โซนอัปโหลดพื้นหลัง */
+        .bg-zone { transition: all 0.3s; border-width: 2px !important; }
+        .upload-zone { border: 2px dashed var(--card-border); background: rgba(255, 255, 255, 0.05); cursor: pointer; transition: all 0.3s; outline: none; }
+        .upload-zone:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--warning-color); }
+
         .preview-tooltip {
             position: fixed; pointer-events: none; z-index: 9999;
             opacity: 0; visibility: hidden; transform: translateY(10px) scale(0.95);
@@ -241,41 +246,65 @@
             
             <div class="d-flex justify-content-end mb-3 px-1">
                 <div class="d-flex gap-2">
-                    <button class="btn btn-sm btn-outline-danger py-1 px-3 rounded-pill" onclick="clearForm()" title="ล้างค่าทั้งหมด"><i class="bi bi-trash"></i> ล้าง</button>
-                    <button class="btn btn-sm btn-outline-primary py-1 px-3 rounded-pill" onclick="saveFavoriteToCloud()" title="บันทึกลงบัญชี"><i class="bi bi-cloud-arrow-up"></i> บันทึกไว้</button>
-                    <button class="btn btn-sm btn-warning py-1 px-3 rounded-pill fw-bold text-dark" onclick="loadFavoriteFromCloud()" title="โหลดจากบัญชี"><i class="bi bi-cloud-arrow-down-fill"></i> โหลดข้อมูล</button>
+                    <button class="btn btn-sm btn-outline-danger py-1 px-3 rounded-pill" onclick="if(window.clearForm) window.clearForm()" title="ล้างค่าทั้งหมด"><i class="bi bi-trash"></i> ล้าง</button>
+                    <button class="btn btn-sm btn-outline-primary py-1 px-3 rounded-pill" onclick="if(window.saveDataKTB3) window.saveDataKTB3()" title="บันทึกลงบัญชี"><i class="bi bi-cloud-arrow-up"></i> บันทึกไว้</button>
+                    <button class="btn btn-sm btn-warning py-1 px-3 rounded-pill fw-bold text-dark" onclick="if(window.loadDataKTB3) window.loadDataKTB3()" title="โหลดจากบัญชี"><i class="bi bi-cloud-arrow-down-fill"></i> โหลดข้อมูล</button>
                 </div>
             </div>
 
             <div class="form-section-card">
                 <div class="form-section-title"><i class="bi bi-phone fs-5"></i> ตั้งค่าโทรศัพท์ & พื้นหลัง</div>
                 <div class="row g-3 align-items-end">
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <label for="datetime_plus_one" class="form-label">เวลามือถือหน้าจอ</label>
                         <input type="time" class="form-control" id="datetime_plus_one" required oninput="if(window.updateDisplay) window.updateDisplay();">
-                    </div>
-                    <div class="col-md-6">
-                        <label for="backgroundSelect" class="form-label">เลือกพื้นหลัง</label>
-                        <select id="backgroundSelect" class="form-select" name="backgroundSelect" onchange="if(window.updateDisplay) window.updateDisplay();">
-                            <option value="assets/image/bs/backgroundEnter-KT4.1.jpg">minimal black</option>
-                            <option value="assets/image/bs/backgroundEnter-KT4.2.jpg">เกาะ</option>
-                            <option value="assets/image/bs/backgroundEnter-KT4.3.jpg">หมีเหลือง</option>
-                            <option value="assets/image/bs/backgroundEnter-KT4.4.jpg">CUTE Girl</option>
-                            <option value="assets/image/bs/backgroundEnter-KT4.5.jpg">Anime Girl</option>
-                            <option value="assets/image/bs/backgroundEnter-KT4.6.jpg">แมวอ้วน</option>
-                            <option value="assets/image/bs/backgroundEnter-KT4.7.jpg">แมวน้อย</option>
-                            <option value="assets/image/bs/backgroundEnter-KT4.8.jpg">น้องเนย</option>
-                            <option value="assets/image/bs/backgroundEnter-KT4.9.jpg">วิวกลางดึกหลังเมือง</option>
-                            <option value="assets/image/bs/backgroundEnter-KT4.10.jpg">GTR R35 (ฤดูใบไม้ร่วง)</option>
-                        </select>
                     </div>
                     <div class="col-12 mt-3">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <label for="battery" class="form-label mb-0">แบตเตอรี่: <span id="battery-level" class="text-success fw-bold">100</span>%</label>
-                            <button type="button" id="powerSavingMode" class="btn btn-outline-warning btn-sm rounded-pill px-3 py-0" style="height: 24px; font-size: 0.75rem;" onclick="togglePowerSavingMode()">โหมดประหยัด</button>
+                            <button type="button" id="powerSavingMode" class="btn btn-outline-warning btn-sm rounded-pill px-3 py-0" style="height: 24px; font-size: 0.75rem;" onclick="if(window.togglePowerSavingMode) window.togglePowerSavingMode()">โหมดประหยัด</button>
                         </div>
-                        <input type="range" class="form-range" id="battery" name="battery" min="0" max="100" value="100" oninput="updateBatteryUI(); if(window.updateDisplay) window.updateDisplay();">
+                        <input type="range" class="form-range" id="battery" name="battery" min="0" max="100" value="100" oninput="if(window.updateBatteryUI) window.updateBatteryUI(); if(window.updateDisplay) window.updateDisplay();">
                     </div>
+                </div>
+            </div>
+
+            <input type="hidden" id="activeBgMode" value="system">
+            <input type="hidden" id="customImageDataUrl" value="">
+
+            <div class="form-section-card">
+                <div class="form-section-title"><i class="bi bi-images fs-5"></i> ภาพพื้นหลัง (Background)</div>
+                
+                <div id="sysZone" class="mb-3 p-3 rounded border-success bg-success bg-opacity-10 bg-zone border">
+                    <label for="backgroundSelect" class="form-label text-success fw-bold" id="sysLabel">
+                        <i class="bi bi-check-circle-fill me-1" id="sysIcon"></i> 1. ใช้พื้นหลังระบบ
+                    </label>
+                    <select id="backgroundSelect" class="form-select border-success" name="backgroundSelect" onchange="if(window.activateSystemMode) window.activateSystemMode(); else if(window.updateDisplay) window.updateDisplay();">
+                        <option value="assets/image/bs/backgroundEnter-KT4.1.jpg">minimal black</option>
+                        <option value="assets/image/bs/backgroundEnter-KT4.2.jpg">เกาะ</option>
+                        <option value="assets/image/bs/backgroundEnter-KT4.3.jpg">หมีเหลือง</option>
+                        <option value="assets/image/bs/backgroundEnter-KT4.4.jpg">CUTE Girl</option>
+                        <option value="assets/image/bs/backgroundEnter-KT4.5.jpg">Anime Girl</option>
+                        <option value="assets/image/bs/backgroundEnter-KT4.6.jpg">แมวอ้วน</option>
+                        <option value="assets/image/bs/backgroundEnter-KT4.7.jpg">แมวน้อย</option>
+                        <option value="assets/image/bs/backgroundEnter-KT4.8.jpg">น้องเนย</option>
+                        <option value="assets/image/bs/backgroundEnter-KT4.9.jpg">วิวกลางดึกหลังเมือง</option>
+                        <option value="assets/image/bs/backgroundEnter-KT4.10.jpg">GTR R35 (ฤดูใบไม้ร่วง)</option>
+                    </select>
+                </div>
+
+                <div id="customZone" class="p-3 rounded border-secondary opacity-75 bg-zone border">
+                    <label class="form-label text-secondary fw-bold" id="customLabel">
+                        <i class="bi bi-circle me-1" id="customIcon"></i> 2. หรืออัปโหลดรูปของคุณเอง
+                    </label>
+                    <div id="pasteDropZone" class="text-center p-3 mb-2 rounded shadow-sm upload-zone" tabindex="0">
+                        <i class="bi bi-clipboard-data" style="font-size: 2rem; color: var(--warning-color);"></i>
+                        <div style="font-size: 0.85rem; margin-top: 10px; color: var(--text-main); font-weight: 500;">
+                            คลิกที่นี่ แล้วกด <kbd class="bg-dark text-white px-2 py-1 rounded">Ctrl</kbd> + <kbd class="bg-dark text-white px-2 py-1 rounded">V</kbd> เพื่อวางรูป
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">(หรือลากไฟล์รูปมาวาง)</div>
+                    </div>
+                    <input type="file" class="form-control text-secondary" id="customBackgroundInput" accept="image/png, image/jpeg">
                 </div>
             </div>
 
@@ -348,149 +377,49 @@
     window.CURRENT_BANK = "NOTIFY_KTB3";
 
     document.addEventListener('DOMContentLoaded', function() {
-        const now = new Date();
-        const timeStr = now.toTimeString().slice(0,5);
-        const dtPlusOne = document.getElementById('datetime_plus_one');
-        if(dtPlusOne) dtPlusOne.value = timeStr;
-        
-        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-        const localISO = now.toISOString().slice(0, 16);
-        const dt = document.getElementById('datetime');
-        if(dt) dt.value = localISO;
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        const themeIcon = document.getElementById('themeIcon');
+        const themeText = document.getElementById('themeText');
+        const body = document.body;
 
-        setTimeout(function() {
-            if (typeof window.updateDisplay === "function") window.updateDisplay();
-        }, 500);
-    });
+        if(themeToggleBtn) {
+            themeText.innerText = "สลับธีม";
+            themeIcon.className = 'bi bi-moon-stars-fill me-2';
 
-    const themeToggleBtn = document.getElementById('themeToggleBtn');
-    const themeIcon = document.getElementById('themeIcon');
-    const themeText = document.getElementById('themeText');
-    const body = document.body;
-
-    if(themeToggleBtn) {
-        themeText.innerText = "สลับธีม";
-        themeIcon.className = 'bi bi-moon-stars-fill me-2';
-
-        themeToggleBtn.addEventListener('click', () => {
-            body.classList.toggle('theme-dark'); 
-            if (body.classList.contains('theme-dark')) {
-                themeIcon.className = 'bi bi-brightness-high-fill me-2';
-                themeIcon.style.color = "#f59e0b"; 
-            } else {
-                themeIcon.className = 'bi bi-moon-stars-fill me-2';
-                themeIcon.style.color = "inherit";
-            }
-        });
-    }
-
-    window.updateBatteryUI = function() {
-        const val = document.getElementById('battery')?.value || 100;
-        const levelText = document.getElementById('battery-level');
-        if(levelText) {
-            levelText.innerText = val;
-            if (val < 20) levelText.className = 'text-danger fw-bold';
-            else if (val < 50) levelText.className = 'text-warning fw-bold';
-            else levelText.className = 'text-success fw-bold';
-        }
-    };
-    
-    window.togglePowerSavingMode = function() {
-        const btn = document.getElementById('powerSavingMode');
-        if(!btn) return;
-        
-        if (btn.classList.contains('btn-warning')) {
-            btn.classList.remove('btn-warning');
-            btn.classList.add('btn-outline-warning');
-        } else {
-            btn.classList.remove('btn-outline-warning');
-            btn.classList.add('btn-warning');
-        }
-        
-        if (typeof window.togglePowerSaving === 'function') window.togglePowerSaving();
-        else if (typeof window.updateDisplay === 'function') window.updateDisplay();
-    };
-
-    const STORAGE_KEY = 'slipFav_KTB_IN_3';
-
-    window.clearForm = function() {
-        const now = new Date();
-        const timeStr = now.toTimeString().slice(0,5);
-        if(document.getElementById('datetime_plus_one')) document.getElementById('datetime_plus_one').value = timeStr;
-        if(document.getElementById('backgroundSelect')) document.getElementById('backgroundSelect').selectedIndex = 0;
-        
-        if(document.getElementById('battery')) {
-            document.getElementById('battery').value = 100;
-            updateBatteryUI();
-        }
-        const btnPower = document.getElementById('powerSavingMode');
-        if(btnPower && btnPower.classList.contains('btn-warning')) {
-            togglePowerSavingMode();
+            themeToggleBtn.addEventListener('click', () => {
+                body.classList.toggle('theme-dark'); 
+                if (body.classList.contains('theme-dark')) {
+                    themeIcon.className = 'bi bi-brightness-high-fill me-2';
+                    themeIcon.style.color = "#f59e0b"; 
+                } else {
+                    themeIcon.className = 'bi bi-moon-stars-fill me-2';
+                    themeIcon.style.color = "inherit";
+                }
+            });
         }
 
-        if(document.getElementById('senderaccount1')) document.getElementById('senderaccount1').value = 'XXX-X-XX875-3';
-        if(document.getElementById('money01')) document.getElementById('money01').value = '30,365.00';
-        
-        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-        const localISO = now.toISOString().slice(0, 16);
-        if(document.getElementById('datetime')) document.getElementById('datetime').value = localISO;
-        
-        if(document.getElementById('bank1')) document.getElementById('bank1').selectedIndex = 0;
-        if(document.getElementById('receiveraccount')) document.getElementById('receiveraccount').value = 'XXX-X-XX142-6';
+        const tooltip = document.getElementById('previewTooltip');
+        const previewImg = document.getElementById('previewImage');
+        const previewTriggers = document.querySelectorAll('a[data-preview]');
 
-        if(window.updateDisplay) window.updateDisplay();
-    };
+        previewTriggers.forEach(item => {
+            item.addEventListener('mouseenter', (e) => {
+                const imgSrc = item.getAttribute('data-preview');
+                if (imgSrc) {
+                    previewImg.src = imgSrc;
+                    tooltip.classList.add('show');
+                }
+            });
 
-    window.saveFavorite = function() {
-        const favData = {
-            bg: document.getElementById('backgroundSelect') ? document.getElementById('backgroundSelect').value : '',
-            sAcc1: document.getElementById('senderaccount1') ? document.getElementById('senderaccount1').value : '',
-            money01: document.getElementById('money01') ? document.getElementById('money01').value : '',
-            b1: document.getElementById('bank1') ? document.getElementById('bank1').value : '',
-            rAcc: document.getElementById('receiveraccount') ? document.getElementById('receiveraccount').value : ''
-        };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(favData));
-        alert('⭐ บันทึกรายการนี้เป็น "รายการโปรด" เรียบร้อยแล้ว!');
-    };
+            item.addEventListener('mousemove', (e) => {
+                tooltip.style.left = (e.clientX + 20) + 'px';
+                tooltip.style.top = (e.clientY + 20) + 'px';
+            });
 
-    window.loadFavorite = function() {
-        const savedStr = localStorage.getItem(STORAGE_KEY);
-        if (savedStr) {
-            const favData = JSON.parse(savedStr);
-            
-            if(favData.bg !== undefined && document.getElementById('backgroundSelect')) document.getElementById('backgroundSelect').value = favData.bg;
-            if(favData.sAcc1 !== undefined && document.getElementById('senderaccount1')) document.getElementById('senderaccount1').value = favData.sAcc1;
-            if(favData.money01 !== undefined && document.getElementById('money01')) document.getElementById('money01').value = favData.money01;
-            if(favData.b1 !== undefined && document.getElementById('bank1')) document.getElementById('bank1').value = favData.b1;
-            if(favData.rAcc !== undefined && document.getElementById('receiveraccount')) document.getElementById('receiveraccount').value = favData.rAcc;
-
-            if(window.updateDisplay) window.updateDisplay();
-        } else {
-            alert('⚠️ คุณยังไม่ได้บันทึกรายการโปรด');
-        }
-    };
-
-    const tooltip = document.getElementById('previewTooltip');
-    const previewImg = document.getElementById('previewImage');
-    const previewTriggers = document.querySelectorAll('a[data-preview]');
-
-    previewTriggers.forEach(item => {
-        item.addEventListener('mouseenter', (e) => {
-            const imgSrc = item.getAttribute('data-preview');
-            if (imgSrc) {
-                previewImg.src = imgSrc;
-                tooltip.classList.add('show');
-            }
-        });
-
-        item.addEventListener('mousemove', (e) => {
-            tooltip.style.left = (e.clientX + 20) + 'px';
-            tooltip.style.top = (e.clientY + 20) + 'px';
-        });
-
-        item.addEventListener('mouseleave', () => {
-            tooltip.classList.remove('show');
-            previewImg.src = '';
+            item.addEventListener('mouseleave', () => {
+                tooltip.classList.remove('show');
+                previewImg.src = '';
+            });
         });
     });
 </script>
