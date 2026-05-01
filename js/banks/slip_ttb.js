@@ -33,7 +33,7 @@
         if (!date || date === '-') return '-';
         const d = new Date(date);
         if (isNaN(d.getTime())) return '-';
-        const day = d.getDate().toString().padStart(2, '0');
+        const day = d.getDate().toString().padStart(2, '');
         const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
         const month = months[d.getMonth()];
         const yearBE = (d.getFullYear() + 543).toString().slice(-2); 
