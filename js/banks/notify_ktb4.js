@@ -127,11 +127,11 @@
             drawText(ctx, `   ${formattedDateWithDay}   `, 308, 167.8, 33.50, 'SFThonburiSemiBold', '#ffffff', 'center', 24, 3, 0, 0, 800, 0);
             drawText(ctx, `${formattedTimePlusOne}`, 295, 298.8, 138.50, 'SFThonburiSemiBold', '#ffffff', 'center', 1.5, 3, 0, 0, 800, -7);
 
-            drawText(ctx, `โอนเงินสำเร็จ`, 107.8, 781, 21.50, 'SFThonburiBold', '#000000', 'left', 1.5, 3, 0, 0, 800, 0);
+            drawText(ctx, `รับเงินสำเร็จ`, 107.8, 781, 21.50, 'SFThonburiBold', '#000000', 'left', 1.5, 3, 0, 0, 800, 0);
             drawText(ctx, `${timeMessage}`, 547.5, 781, 18.50, 'SFThonburiRegular', '#6f8590', 'right', 1.5, 3, 0, 0, 800, 0);
             drawText(ctx, `ได้รับ +${money01} บาท จากบัญชี ${senderaccount1} ไปยังบัญชี ${bank1} ${receiveraccount}`, 107.8, 812, 20.50, 'SFThonburiRegular', '#000000', 'left', 31.5, 3, 0, 0, 430, -0.25);
 
-            drawText(ctx, `โอนเงินสำเร็จ`, 107.8, 919.2, 21.50, 'SFThonburiBold', '#000000', 'left', 1.5, 3, 0, 0, 800, 0);
+            drawText(ctx, `รับเงินสำเร็จ`, 107.8, 919.2, 21.50, 'SFThonburiBold', '#000000', 'left', 1.5, 3, 0, 0, 800, 0);
             drawText(ctx, `${timeMessage2}`, 547.5, 919.2, 18.50, 'SFThonburiRegular', '#6f8590', 'right', 1.5, 3, 0, 0, 800, 0);
             drawText(ctx, `ได้รับ +${money02} บาท จากบัญชี ${senderaccount1} ไปยังบัญชี ${bank2} ${receiveraccount1}`, 107.8, 950, 20.50, 'SFThonburiRegular', '#000000', 'left', 31.5, 3, 0, 0, 430, -0.25);
 
